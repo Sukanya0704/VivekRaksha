@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import * as LucideIcons from 'lucide-react';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const { ArrowLeft, ArrowRight, CheckCircle, ShieldAlert, Info, Shield, HelpCircle } = LucideIcons;
 
@@ -24,8 +25,8 @@ const UpiSimulator = () => {
             {/* Purple Header */}
             <div style={{ background: '#5f259f', padding: '1.5rem', color: 'white', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <p style={{ fontSize: '0.7rem', opacity: 0.8 }}>Your Location</p>
-                <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>Safety Town, IN</p>
+                <p style={{ fontSize: '0.7rem', opacity: 0.8 }}>{t('yourLocation')}</p>
+                <p style={{ fontSize: '0.9rem', fontWeight: '600' }}>{t('safetyTown')}</p>
               </div>
               <div style={{ width: '36px', height: '36px', background: 'rgba(255,255,255,0.2)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                  {HelpCircle && <HelpCircle size={20} />}
@@ -34,31 +35,31 @@ const UpiSimulator = () => {
             
             <div style={{ padding: '1.2rem', flex: 1, background: '#f5f5f5', color: '#333' }}>
               <div style={{ background: 'white', padding: '1.2rem', color: '#1a1a1a', marginBottom: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
-                <p style={{ fontWeight: '700', marginBottom: '1.2rem', fontSize: '1rem' }}>Transfer Money</p>
+                <p style={{ fontWeight: '700', marginBottom: '1.2rem', fontSize: '1rem' }}>{t('transferMoney')}</p>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px', textAlign: 'center', fontSize: '0.7rem' }}>
                   <div onClick={() => setStep(2)} style={{ cursor: 'pointer' }}>
                     <div style={{ background: '#5f259f', width: '48px', height: '48px', borderRadius: '16px', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                       {ArrowRight && <ArrowRight size={24} />}
                     </div>
-                    To Contact
+                    {t('toContact')}
                   </div>
                   <div>
                     <div style={{ background: '#5f259f', width: '48px', height: '48px', borderRadius: '16px', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                       {Shield && <Shield size={24} />}
                     </div>
-                    To Bank
+                    {t('toBank')}
                   </div>
                   <div>
                     <div style={{ background: '#5f259f', width: '48px', height: '48px', borderRadius: '16px', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                       {ArrowLeft && <ArrowLeft size={24} />}
                     </div>
-                    Self A/c
+                    {t('selfAccount')}
                   </div>
                   <div>
                     <div style={{ background: '#5f259f', width: '48px', height: '48px', borderRadius: '16px', margin: '0 auto 8px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white' }}>
                       {CheckCircle && <CheckCircle size={24} />}
                     </div>
-                    Check Bal
+                    {t('checkBalance')}
                   </div>
                 </div>
               </div>
@@ -66,10 +67,10 @@ const UpiSimulator = () => {
               <div style={{ background: 'white', padding: '1.2rem', borderRadius: '16px', border: '1px solid #e0e0e0', borderLeft: '4px solid #5f259f' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                     {Info && <Info size={16} color="#5f259f" />}
-                    <p style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#5f259f' }}>TUTORIAL TIP</p>
+                    <p style={{ fontSize: '0.8rem', fontWeight: 'bold', color: '#5f259f' }}>{t('tutorialTip')}</p>
                 </div>
                 <p style={{ fontSize: '0.75rem', lineHeight: '1.4', color: '#444' }}>
-                  In apps like PhonePe, click <strong>"To Contact"</strong> to start. Warning: Never trust links from unknown people!
+                  {t('upiTutorialTip')}
                 </p>
               </div>
             </div>
@@ -84,7 +85,7 @@ const UpiSimulator = () => {
                 {ArrowLeft && <ArrowLeft size={24} />}
               </div>
               <div>
-                <p style={{ fontWeight: 'bold', fontSize: '1rem' }}>Simulated User</p>
+                <p style={{ fontWeight: 'bold', fontSize: '1rem' }}>{t('simulatedUser')}</p>
                 <p style={{ fontSize: '0.75rem', color: '#888' }}>+91 99887 76655</p>
               </div>
             </div>
@@ -92,7 +93,7 @@ const UpiSimulator = () => {
               <div style={{ background: '#f5f5f5', width: '70px', height: '70px', borderRadius: '50%', margin: '0 auto 1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 'bold', border: '2px solid #5f259f' }}>
                 SU
               </div>
-              <p style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '2rem' }}>Enter Amount</p>
+              <p style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '2rem' }}>{t('enterAmount')}</p>
               <div style={{ position: 'relative', maxWidth: '200px', margin: '0 auto' }}>
                 <span style={{ position: 'absolute', left: '-20px', top: '50%', transform: 'translateY(-50%)', fontSize: '1.8rem', fontWeight: 'bold' }}>₹</span>
                 <input 
@@ -110,7 +111,7 @@ const UpiSimulator = () => {
               onClick={() => setStep(3)}
               style={{ background: '#5f259f', color: 'white', padding: '1.2rem', fontSize: '1.1rem', fontWeight: 'bold', border: 'none', cursor: amount ? 'pointer' : 'not-allowed', opacity: amount ? 1 : 0.6 }}
             >
-              PROCEED TO PAY
+              {t('proceedToPay')}
             </button>
           </div>
         );
@@ -119,8 +120,8 @@ const UpiSimulator = () => {
         return (
           <div style={{ height: '100%', background: '#fff', color: '#333', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '2.5rem 1.5rem', textAlign: 'center', flex: 1 }}>
-              <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>ENTER 4-DIGIT UPI PIN</p>
-              <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '2.5rem' }}>Paying ₹{amount}</p>
+              <p style={{ fontSize: '0.9rem', color: '#666', marginBottom: '0.5rem' }}>{t('enterUpiPin')}</p>
+              <p style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '2.5rem' }}>{t('paying')} ₹{amount}</p>
               
               <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginBottom: '3rem' }}>
                 {[1,2,3,4].map(i => <div key={i} style={{ width: '16px', height: '16px', borderRadius: '50%', border: '2px solid #5f259f', background: 'transparent' }}></div>)}
@@ -129,14 +130,14 @@ const UpiSimulator = () => {
               <div style={{ background: '#fff0f0', border: '1px solid #ffcccc', padding: '1.2rem', borderRadius: '16px', textAlign: 'left' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '10px', color: '#d64545' }}>
                    {ShieldAlert && <ShieldAlert size={24} />}
-                   <span style={{ fontWeight: 'bold' }}>IMPORTANT SAFETY</span>
+                   <span style={{ fontWeight: 'bold' }}>{t('importantSafety')}</span>
                 </div>
                 <p style={{ fontSize: '0.8rem', lineHeight: '1.5', color: '#444' }}>
-                  If you are <strong>RECEIVING</strong> money, you never need to enter your PIN. Scammers will try to trick you into entering your PIN to steal your money!
+                  {t('receivingMoneyTip')}
                 </p>
               </div>
             </div>
-            <button onClick={() => setStep(4)} style={{ background: '#1a1a1a', color: 'white', padding: '1.2rem', border: 'none', fontWeight: 'bold', fontSize: '1rem' }}>SUBMIT PIN</button>
+            <button onClick={() => setStep(4)} style={{ background: '#1a1a1a', color: 'white', padding: '1.2rem', border: 'none', fontWeight: 'bold', fontSize: '1rem' }}>{t('submitPin')}</button>
           </div>
         );
 
@@ -146,10 +147,10 @@ const UpiSimulator = () => {
             <div style={{ background: 'rgba(255,255,255,0.2)', padding: '1.5rem', borderRadius: '50%', marginBottom: '1.5rem' }}>
                 {CheckCircle && <CheckCircle size={80} color="white" />}
             </div>
-            <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>Payment Successful</h2>
-            <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>₹{amount} sent</p>
+            <h2 style={{ fontSize: '1.8rem', marginBottom: '0.5rem' }}>{t('paymentSuccessful')}</h2>
+            <p style={{ fontSize: '1.2rem', opacity: 0.9 }}>₹{amount} {t('sent')}</p>
             <button className="btn btn-primary" style={{ marginTop: '2.5rem', background: 'white', color: '#10b981' }} onClick={() => navigate('/banking')}>
-              Finish Training
+              {t('finishTraining')}
             </button>
           </div>
         );
@@ -160,9 +161,17 @@ const UpiSimulator = () => {
   };
 
   return (
-    <div className="module-page" style={{ minHeight: '100vh', background: '#1a1a1a', padding: '2rem' }}>
+    <div className="module-page" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '2rem' }}>
       <div className="container" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <h2 className="title-lg" style={{ color: 'white', marginBottom: '2rem' }}>{t('moduleUPI')}</h2>
+        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+             <button onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+                <LucideIcons.ArrowLeft size={24} />
+             </button>
+             <h2 className="title-lg" style={{ color: 'var(--text-primary)', margin: 0 }}>{t('moduleUPI')}</h2>
+          </div>
+          <ThemeToggle />
+        </div>
         
         {/* Mobile Mockup */}
         <div style={{ 
@@ -185,7 +194,7 @@ const UpiSimulator = () => {
         </div>
 
         <div style={{ marginTop: '2rem', maxWidth: '400px', textAlign: 'center' }}>
-             <p style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.5)' }}>Note: This is a safe simulation. No real money is involved.</p>
+             <p style={{ fontSize: '0.9rem', color: 'var(--text-primary)', opacity: 0.5 }}>{t('noteSandbox')}</p>
         </div>
       </div>
     </div>

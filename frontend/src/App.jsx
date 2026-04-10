@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LanguageProvider } from './context/LanguageContext';
+import { ThemeProvider } from './context/ThemeContext';
 import './App.css';
 
 import Home from './pages/Home';
@@ -14,9 +15,10 @@ import OtpSimulator from './pages/modules/OtpSimulator';
 
 function App() {
   return (
-    <LanguageProvider>
-      <Router>
-        <Routes>
+    <ThemeProvider>
+      <LanguageProvider>
+        <Router>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -28,6 +30,7 @@ function App() {
         </Routes>
       </Router>
     </LanguageProvider>
+    </ThemeProvider>
   );
 }
 

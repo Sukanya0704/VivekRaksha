@@ -1,14 +1,23 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Shield, Key, Phone, User, AlertTriangle, Loader2 } from 'lucide-react';
+import { Key, Phone, User, AlertTriangle, Loader2 } from 'lucide-react';
+import ThemeToggle from '../components/ThemeToggle';
+import logo from '../assets/logo.png';
 
 const Login = () => {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const isCompact = language === 'hi' || language === 'mr';
-  const [isSignup, setIsSignup] = useState(false);
+  const [isSignup, setIsSignup] = useState(location.state?.isSignup || false);
   const [loading, setLoading] = useState(false);
+
+  React.useEffect(() => {
+    if (location.state?.isSignup !== undefined) {
+      setIsSignup(location.state.isSignup);
+    }
+  }, [location.state]);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -27,7 +36,7 @@ const Login = () => {
     try {
       if (isSignup) {
         if (formData.pin !== formData.confirmPin) {
-          alert("PINs do not match!");
+          alert(t('pinMismatch'));
           setLoading(false);
           return;
         }
@@ -45,7 +54,7 @@ const Login = () => {
         const data = await res.json();
         if (!res.ok) throw new Error(data.message);
 
-        alert("Sign up successful! Please log in with your PIN.");
+        alert(t('signupSuccess'));
         setIsSignup(false);
       } else {
         const res = await fetch('http://localhost:5000/api/auth/login', {
@@ -65,31 +74,34 @@ const Login = () => {
         navigate('/dashboard');
       }
     } catch (err) {
-      alert(err.message || "An error occurred");
+      alert(err.message || t('errorOccurred'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="login-container flex-center" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '20px' }}>
+    <div className="login-container flex-center" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '20px', position: 'relative' }}>
+      <div style={{ position: 'absolute', top: '2rem', right: '2rem' }}>
+        <ThemeToggle />
+      </div>
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: isCompact ? '24px' : '32px' }}>
         <div style={{ textAlign: 'center', marginBottom: isCompact ? '1rem' : '2rem' }}>
-          <Shield size={48} color="#FF9F1C" style={{ marginBottom: '1rem' }} />
-          <h2 className="title-lg">{isSignup ? t('signup') : t('login')}</h2>
+          <img src={logo} alt="Logo" style={{ height: '48px', marginBottom: '1rem' }} />
+          <h2 className="title-lg" style={{ color: 'var(--text-primary)' }}>{isSignup ? t('signup') : t('login')}</h2>
         </div>
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isCompact ? '0.8rem' : '1.2rem' }}>
           {isSignup && (
             <div className="input-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'rgba(234, 234, 234, 0.7)' }}>
-                <User size={18} /> Name
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-primary)', opacity: 0.85 }}>
+                <User size={18} /> {t('name')}
               </label>
               <input 
                 type="text" 
                 name="name" 
                 className="input-control" 
-                placeholder="Enter your name" 
+                placeholder={t('enterName')} 
                 value={formData.name}
                 onChange={handleInputChange}
                 required
@@ -98,7 +110,7 @@ const Login = () => {
           )}
 
           <div className="input-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'rgba(234, 234, 234, 0.7)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-primary)', opacity: 0.85 }}>
               <Phone size={18} /> {t('phoneNum')}
             </label>
             <input 
@@ -113,7 +125,7 @@ const Login = () => {
           </div>
 
           <div className="input-group">
-            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'rgba(234, 234, 234, 0.7)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-primary)', opacity: 0.85 }}>
               <Key size={18} /> {t('pin')}
             </label>
             <input 
@@ -130,7 +142,7 @@ const Login = () => {
 
           {isSignup && (
             <div className="input-group">
-              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'rgba(234, 234, 234, 0.7)' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px', color: 'var(--text-primary)', opacity: 0.85 }}>
                 <Key size={18} /> {t('confirmPin')}
               </label>
               <input 
@@ -158,8 +170,8 @@ const Login = () => {
           </button>
 
           <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem' }}>
-            <span style={{ color: 'rgba(234, 234, 234, 0.6)' }}>
-              {isSignup ? "Already have an account? " : "Don't have an account? "}
+            <span style={{ color: 'var(--text-primary)', opacity: 0.8 }}>
+              {isSignup ? t('alreadyHaveAccount') : t('dontHaveAccount')}
             </span>
             <button 
               type="button" 
@@ -172,7 +184,7 @@ const Login = () => {
           </div>
           
           {!isSignup && (
-            <button type="button" style={{ background: 'none', border: 'none', color: 'rgba(234, 234, 234, 0.4)', fontSize: '0.8rem', cursor: 'pointer', marginTop: '0.5rem' }}>
+            <button type="button" style={{ background: 'none', border: 'none', color: 'var(--text-primary)', opacity: 0.65, fontSize: '0.8rem', cursor: 'pointer', marginTop: '0.5rem' }}>
               {t('forgotPassword')}
             </button>
           )}

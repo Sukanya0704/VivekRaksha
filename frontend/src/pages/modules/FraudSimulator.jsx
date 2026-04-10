@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { ArrowLeft, ShieldCheck, ShieldX, PhoneIncoming, MessageSquareWarning, ArrowRight } from 'lucide-react';
+import ThemeToggle from '../../components/ThemeToggle';
 
 const FraudSimulator = () => {
   const { t } = useLanguage();
@@ -14,21 +15,21 @@ const FraudSimulator = () => {
   const scenarios = [
     {
       type: 'sms',
-      content: "DEAR CUSTOMER, YOUR BANK ACCOUNT IS LOCKED DUE TO KYC PENDING. CLICK HERE TO UPDATE IMMEDIATELY: http://update-kyc-bank.net/login",
+      content: t('fraudS1Content'),
       sender: "BK-BANKSMS",
-      redFlags: ["Urgent tone (IMMEDIATELY)", "Spelling/Grammar issues", "Suspicious URL (update-kyc-bank.net is not a bank domain)"],
+      redFlags: [t('fraudS1Flag1'), t('fraudS1Flag2'), t('fraudS1Flag3')],
       isScam: true
     },
     {
       type: 'call',
-      content: "Hello, I am calling from State Bank. Your credit card reward points are expiring today. Please share the 6-digit OTP I just sent you to redeem them.",
+      content: t('fraudS2Content'),
       sender: "+91 82345 61234",
-      redFlags: ["Asking for OTP (Banks NEVER ask for OTP)", "Creating false urgency (Expiring today)"],
+      redFlags: [t('fraudS2Flag1'), t('fraudS2Flag2')],
       isScam: true
     },
     {
       type: 'sms',
-      content: "Your transaction of ₹2,500 at Amazon.in was successful. If not done by you, report here: 1800-BANK-HELP",
+      content: t('fraudS3Content'),
       sender: "AMAZON",
       redFlags: [],
       isScam: false
@@ -60,7 +61,7 @@ const FraudSimulator = () => {
     return (
       <div className="quiz-section animate-fade-in">
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <span style={{ color: 'var(--color-warning-orange)', fontWeight: 'bold' }}>Progress: {currentScenario + 1} / {scenarios.length}</span>
+          <span style={{ color: 'var(--color-warning-orange)', fontWeight: 'bold' }}>{t('progress')}: {currentScenario + 1} / {scenarios.length}</span>
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -92,13 +93,13 @@ const FraudSimulator = () => {
         </div>
 
         <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-          <h4 style={{ marginBottom: '1.5rem' }}>Is this a scam or legitimate?</h4>
+          <h4 style={{ marginBottom: '1.5rem' }}>{t('scamOrLegit')}</h4>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem' }}>
             <button className="btn btn-warning" onClick={() => handleDecision(true)} disabled={showResult}>
-              <ShieldX /> IT'S A SCAM
+              <ShieldX /> {t('scamButton')}
             </button>
             <button className="btn btn-primary" onClick={() => handleDecision(false)} disabled={showResult}>
-              <ShieldCheck /> IT'S SAFE
+              <ShieldCheck /> {t('safeButton')}
             </button>
           </div>
         </div>
@@ -107,23 +108,23 @@ const FraudSimulator = () => {
           <div className="glass-panel animate-fade-in" style={{ marginTop: '2rem', background: isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', border: `1px solid ${isCorrect ? '#10B981' : '#EF4444'}` }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1rem' }}>
               {isCorrect ? <ShieldCheck color="#10B981" size={32} /> : <MessageSquareWarning color="#EF4444" size={32} />}
-              <h4 style={{ color: isCorrect ? '#10B981' : '#EF4444' }}>{isCorrect ? "Correct!" : "Incorrect!"}</h4>
+              <h4 style={{ color: isCorrect ? '#10B981' : '#EF4444' }}>{isCorrect ? t('correct') : t('incorrect')}</h4>
             </div>
             <p style={{ marginBottom: '1rem' }}>
               {scenario.isScam 
-                ? "This was a malicious attempt to steal your data." 
-                : "This was a standard automated notification from a trusted service."}
+                ? t('scamResult') 
+                : t('safeResult')}
             </p>
             {scenario.redFlags.length > 0 && (
               <div style={{ background: 'rgba(58, 58, 58, 0.4)', padding: '1rem', borderRadius: '12px' }}>
-                <p style={{ fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>Red Flags Detected:</p>
+                <p style={{ fontWeight: 'bold', fontSize: '0.85rem', marginBottom: '0.5rem' }}>{t('redFlagsDetected')}</p>
                 <ul style={{ fontSize: '0.8rem', paddingLeft: '1.2rem' }}>
                   {scenario.redFlags.map((flag, i) => <li key={i}>{flag}</li>)}
                 </ul>
               </div>
             )}
             <button className="btn btn-outline" style={{ marginTop: '1.5rem', width: '100%' }} onClick={nextScenario}>
-               Next Scenario <ArrowRight size={18} />
+               {t('nextScenario')} <ArrowRight size={18} />
             </button>
           </div>
         )}
@@ -135,11 +136,11 @@ const FraudSimulator = () => {
     return (
       <div className="glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
         <ShieldCheck size={80} color="#FF9F1C" style={{ marginBottom: '2rem' }} />
-        <h2 className="title-lg">Training Complete!</h2>
-        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>You correctly identified {score} out of {scenarios.length} scenarios.</p>
+        <h2 className="title-lg">{t('trainingComplete')}</h2>
+        <p style={{ fontSize: '1.2rem', marginBottom: '2rem' }}>{t('scoreSummary', { score, total: scenarios.length }).replace('{score}', score).replace('{total}', scenarios.length)}</p>
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem' }}>
-            <button className="btn btn-primary" onClick={() => navigate('/banking')}>Back to Portals</button>
-            <button className="btn btn-outline" onClick={() => { setStep('quiz'); setCurrentScenario(0); setScore(0); setShowResult(false); }}>Try Again</button>
+            <button className="btn btn-primary" onClick={() => navigate('/banking')}>{t('backToPortals')}</button>
+            <button className="btn btn-outline" onClick={() => { setStep('quiz'); setCurrentScenario(0); setScore(0); setShowResult(false); }}>{t('tryAgain')}</button>
         </div>
       </div>
     );
@@ -147,11 +148,14 @@ const FraudSimulator = () => {
 
   return (
     <div className="module-page" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '2rem' }}>
-      <header style={{ marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-          <ArrowLeft size={24} />
-        </button>
-        <h2 className="title-lg" style={{ margin: 0 }}>{t('moduleFraud')}</h2>
+      <header style={{ marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center' }}>
+            <ArrowLeft size={24} />
+          </button>
+          <h2 className="title-lg" style={{ margin: 0, color: 'var(--text-primary)' }}>{t('moduleFraud')}</h2>
+        </div>
+        <ThemeToggle />
       </header>
 
       <div className="container" style={{ maxWidth: '800px' }}>
