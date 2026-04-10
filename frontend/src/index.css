@@ -6,48 +6,53 @@
   --color-warning-orange: #FF9F1C;
   --color-soft-white: #EAEAEA;
   --color-grey: #3A3A3A;
-  
+
   --bg-primary: var(--color-charcoal);
   --bg-secondary: var(--color-grey);
-  
+
   --text-primary: var(--color-soft-white);
   --text-inverse: var(--color-charcoal);
-  
+
   --title-gradient-start: #FFFFFF;
   --title-gradient-end: #A0A0A0;
-  
+
   --btn-primary-hover: #ffffff;
-  
-  --accent-primary: #3B82F6; 
+
+  --accent-primary: #3B82F6;
   --accent-blue: #3B82F6;
-  
+
   --glass-bg: rgba(58, 58, 58, 0.4);
   --glass-nav-bg: rgba(30, 30, 30, 0.8);
   --glass-border: rgba(234, 234, 234, 0.1);
   --glass-shadow: rgba(0, 0, 0, 0.3);
-  
+
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
+
+  --phonepe-purple: #5f259f;
+  --phonepe-light-purple: #8e44ad;
+  --phonepe-gold: #f1c40f;
 }
 
 [data-theme="light"] {
   --bg-primary: #f8fafc;
   --bg-secondary: #ffffff;
-  
+
   --text-primary: #0f172a;
   --text-inverse: #ffffff;
-  
+
   --title-gradient-start: #1e293b;
   --title-gradient-end: #64748b;
-  
+
   --btn-primary-hover: #1e293b;
-  
+
   --glass-bg: rgba(255, 255, 255, 0.6);
   --glass-nav-bg: rgba(255, 255, 255, 0.8);
   --glass-border: rgba(0, 0, 0, 0.05);
   --glass-shadow: rgba(0, 0, 0, 0.05);
-  
-  --color-soft-white: #0f172a; /* Make primary buttons dark when in light mode */
+
+  --color-soft-white: #0f172a;
+  /* Make primary buttons dark when in light mode */
   --color-charcoal: #ffffff;
 }
 
@@ -66,7 +71,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   letter-spacing: -0.02em;
   margin-bottom: 0.5rem;
@@ -162,6 +172,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 800;
   background: linear-gradient(135deg, var(--title-gradient-start) 0%, var(--title-gradient-end) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.1;
 }
@@ -225,6 +236,7 @@ h1, h2, h3, h4, h5, h6 {
   .grid-cols-2 {
     grid-template-columns: 1fr;
   }
+
   .title-xl {
     font-size: 2.5rem;
   }
@@ -238,8 +250,15 @@ a {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -261,7 +280,7 @@ a {
   background: #f1f3f4;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   border: 1px solid #dcdcdc;
@@ -327,5 +346,12 @@ a {
 }
 
 /* App Branding */
-.bank-brand { color: #004a99; font-weight: 800; }
-.hotel-brand { color: #ff5a5f; font-weight: 800; }
+.bank-brand {
+  color: #004a99;
+  font-weight: 800;
+}
+
+.hotel-brand {
+  color: #ff5a5f;
+  font-weight: 800;
+}

@@ -1,7 +1,7 @@
+//import React, { useState } from 'react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
 import { Globe, Sun, Moon, Smartphone, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 import logo from '../assets/logo.png';
@@ -9,17 +9,16 @@ import homeUser1 from '../assets/home_user1.jpg';
 import homeUser2 from '../assets/home_user2.jpg';
 import homeUser3 from '../assets/home_user3.jpg';
 import homeUser4 from '../assets/home_user4.jpg';
-import homeUser5 from '../assets/home_user5.jpg';
 
 const homeImages = [homeUser1, homeUser2, homeUser3, homeUser4];
 
 const Home = () => {
   const { language, changeLanguage, t } = useLanguage();
-  const { theme } = useTheme();
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(() => !sessionStorage.getItem('languageSelected'));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  // Modal will now show every time the component mounts
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % homeImages.length);
@@ -27,12 +26,7 @@ const Home = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const langSelected = sessionStorage.getItem('languageSelected');
-    if (!langSelected) {
-      setShowModal(true);
-    }
-  }, []);
+
 
   const handleLanguageSelect = (lang) => {
     changeLanguage(lang);
@@ -42,7 +36,7 @@ const Home = () => {
 
   return (
     <div className="home-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
-      
+
       {/* Background blobs for premium look */}
       <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }}></div>
       <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(255,159,28,0.1) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }}></div>
@@ -61,12 +55,12 @@ const Home = () => {
             <Globe size={48} color="#FF9F1C" style={{ marginBottom: '1.5rem' }} />
             <h2 style={{ marginBottom: '1.5rem', color: '#EAEAEA' }}>{t('chooseLanguage')}</h2>
             <p style={{ marginBottom: '2.5rem', color: 'rgba(234,234,234,0.8)' }}>{t('selectLangTitle')}</p>
-            
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {['en', 'hi', 'mr'].map(lang => (
-                <button 
+                <button
                   key={lang}
-                  className="btn btn-outline" 
+                  className="btn btn-outline"
                   style={{ width: '100%', padding: '1rem', border: language === lang ? '2px solid #FF9F1C' : '1px solid rgba(234,234,234,0.2)' }}
                   onClick={() => handleLanguageSelect(lang)}
                 >
@@ -85,7 +79,7 @@ const Home = () => {
             {t('appTitle')}
           </h1>
         </div>
-        
+
         <div className="theme-toggle" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <button onClick={() => setShowModal(true)} className="btn btn-outline" title="Change Language" style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <Globe size={18} />
@@ -101,15 +95,15 @@ const Home = () => {
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 12px', background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.3)', borderRadius: '20px', marginBottom: '1.5rem', color: '#3B82F6', fontWeight: 600, fontSize: '0.85rem' }}>
               <ShieldCheck size={16} /> {t('riskFreeLearning')}
             </div>
-            
+
             <h2 className="title-xl" style={{ marginBottom: '1rem' }}>
               {t('masterDigital')} <br /><span style={{ color: '#FF9F1C' }}>{t('trustSafety')}</span>
             </h2>
-            
+
             <p style={{ fontSize: '1.25rem', marginBottom: '2.5rem', color: 'var(--text-primary)', fontWeight: 500, lineHeight: 1.7 }}>
               {t('infoText')}
             </p>
-            
+
             <div className="cta-buttons" style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
               <button className="btn btn-warning" style={{ padding: '14px 32px', fontSize: '1.1rem' }} onClick={() => navigate('/login')}>
                 {t('startSimulation')}
@@ -122,28 +116,28 @@ const Home = () => {
 
           {/* Right Visual Content */}
           <div className="animate-fade-in-delay-1" style={{ position: 'relative', height: '100%', minHeight: '400px', width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <div style={{ 
-              width: '100%', 
-              height: '450px', 
-              borderRadius: '24px', 
-              overflow: 'hidden', 
+            <div style={{
+              width: '100%',
+              height: '450px',
+              borderRadius: '24px',
+              overflow: 'hidden',
               boxShadow: '0 15px 50px rgba(0,0,0,0.2)',
               position: 'relative'
             }}>
-              <img 
+              <img
                 key={currentImageIndex}
-                src={homeImages[currentImageIndex]} 
-                alt="Digital Empowerment" 
+                src={homeImages[currentImageIndex]}
+                alt="Digital Empowerment"
                 className="animate-fade-in"
-                style={{ 
-                  width: '100%', 
+                style={{
+                  width: '100%',
                   height: '110%', // Make it taller to crop the bottom
                   objectFit: 'cover',
                   objectPosition: 'top', // Focus on the top/center to push the bottom out
-                  opacity: 1, 
+                  opacity: 1,
                   zIndex: 1,
                   transition: 'opacity 0.8s ease-in-out'
-                }} 
+                }}
               />
             </div>
           </div>
