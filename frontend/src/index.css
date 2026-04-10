@@ -13,102 +13,42 @@
   --text-primary: var(--color-soft-white);
   --text-inverse: var(--color-charcoal);
   
+  --title-gradient-start: #FFFFFF;
+  --title-gradient-end: #A0A0A0;
+  
+  --btn-primary-hover: #ffffff;
+  
   --accent-primary: #3B82F6; 
   --accent-blue: #3B82F6;
   
-  /* PhonePe Brand Colors */
-  --phonepe-purple: #5f259f;
-  --phonepe-light-purple: #7b39c6;
-  --phonepe-gold: #ffd700;
-  --phonepe-bg: #f5f7fa;
+  --glass-bg: rgba(58, 58, 58, 0.4);
+  --glass-nav-bg: rgba(30, 30, 30, 0.8);
+  --glass-border: rgba(234, 234, 234, 0.1);
+  --glass-shadow: rgba(0, 0, 0, 0.3);
   
   --font-heading: 'Outfit', sans-serif;
   --font-body: 'Inter', sans-serif;
 }
 
-/* Accessibility: Increased weight for non-Latin scripts */
-.hi-text, [lang="hi"] {
-  font-weight: 500 !important;
-}
-.mr-text, [lang="mr"] {
-  font-weight: 500 !important;
-}
-
-/* Stronger weight for instructions */
-.instruction-text {
-  font-weight: 600;
-}
-
-/* Pulse Animation for Targets */
-@keyframes pulse-target {
-  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0.4); }
-  70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(95, 37, 159, 0); }
-  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(95, 37, 159, 0); }
-}
-
-.pulsing-target {
-  animation: pulse-target 2s infinite;
-  z-index: 5;
-  position: relative;
-}
-
-/* Floating Guide styles */
-.floating-guide-container {
-  position: absolute;
-  z-index: 1000;
-  pointer-events: none;
-  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-}
-
-.floating-guide-box {
-  background: white;
-  color: #333;
-  padding: 12px 16px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-  border: 2px solid var(--phonepe-purple);
-  max-width: 200px;
-  pointer-events: auto;
-  position: relative;
-}
-
-.guide-arrow {
-  position: absolute;
-  width: 0;
-  height: 0;
-  border-style: solid;
-}
-
-.guide-arrow-left {
-  border-width: 8px 10px 8px 0;
-  border-color: transparent var(--phonepe-purple) transparent transparent;
-  left: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.guide-arrow-right {
-  border-width: 8px 0 8px 10px;
-  border-color: transparent transparent transparent var(--phonepe-purple);
-  right: -10px;
-  top: 50%;
-  transform: translateY(-50%);
-}
-
-.guide-arrow-top {
-  border-width: 0 8px 10px 8px;
-  border-color: transparent transparent var(--phonepe-purple) transparent;
-  top: -10px;
-  left: 50%;
-  transform: translateX(-50%);
-}
-
-.guide-arrow-bottom {
-  border-width: 10px 8px 0 8px;
-  border-color: var(--phonepe-purple) transparent transparent transparent;
-  bottom: -10px;
-  left: 50%;
-  transform: translateX(-50%);
+[data-theme="light"] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  
+  --text-primary: #0f172a;
+  --text-inverse: #ffffff;
+  
+  --title-gradient-start: #1e293b;
+  --title-gradient-end: #64748b;
+  
+  --btn-primary-hover: #1e293b;
+  
+  --glass-bg: rgba(255, 255, 255, 0.6);
+  --glass-nav-bg: rgba(255, 255, 255, 0.8);
+  --glass-border: rgba(0, 0, 0, 0.05);
+  --glass-shadow: rgba(0, 0, 0, 0.05);
+  
+  --color-soft-white: #0f172a; /* Make primary buttons dark when in light mode */
+  --color-charcoal: #ffffff;
 }
 
 * {
@@ -134,20 +74,20 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Glassmorphism utility classes */
 .glass-panel {
-  background: rgba(58, 58, 58, 0.4);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(234, 234, 234, 0.1);
+  border: 1px solid var(--glass-border);
   border-radius: 16px;
   padding: 24px;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px 0 var(--glass-shadow);
 }
 
 .glass-nav {
-  background: rgba(30, 30, 30, 0.8);
+  background: var(--glass-nav-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(234, 234, 234, 0.05);
+  border-bottom: 1px solid var(--glass-border);
   position: sticky;
   top: 0;
   z-index: 50;
@@ -185,7 +125,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .btn-primary:hover {
-  background-color: #ffffff;
+  background-color: var(--btn-primary-hover);
 }
 
 .btn-warning {
@@ -220,7 +160,7 @@ h1, h2, h3, h4, h5, h6 {
 .title-xl {
   font-size: 3.5rem;
   font-weight: 800;
-  background: linear-gradient(135deg, #FFFFFF 0%, #A0A0A0 100%);
+  background: linear-gradient(135deg, var(--title-gradient-start) 0%, var(--title-gradient-end) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   line-height: 1.1;
@@ -235,10 +175,10 @@ h1, h2, h3, h4, h5, h6 {
 .input-control {
   width: 100%;
   padding: 14px 16px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(234, 234, 234, 0.2);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: 12px;
-  color: var(--color-soft-white);
+  color: var(--text-primary);
   font-family: var(--font-body);
   font-size: 1rem;
   transition: all 0.3s ease;
@@ -247,12 +187,13 @@ h1, h2, h3, h4, h5, h6 {
 .input-control:focus {
   outline: none;
   border-color: var(--color-warning-orange);
-  background: rgba(0, 0, 0, 0.4);
+  background: var(--glass-nav-bg);
   box-shadow: 0 0 0 2px rgba(255, 159, 28, 0.2);
 }
 
 ::placeholder {
-  color: rgba(234, 234, 234, 0.4);
+  color: var(--text-primary);
+  opacity: 0.5;
 }
 
 /* Layout Utilities */
