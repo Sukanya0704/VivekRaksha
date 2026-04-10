@@ -16,7 +16,9 @@ import {
   Eye,
   Layout,
   ExternalLink,
-  ChevronLeft
+  ChevronLeft,
+  Navigation,
+  ArrowDown
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
@@ -42,6 +44,78 @@ const BrowserFrame = ({ children, url, status = 'secure' }) => {
   );
 };
 
+const InstructorGuide = ({ text, style = {}, arrow = 'left', onDismiss }) => {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.8, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.8 }}
+      className="instructor-guide"
+      style={{
+        position: 'absolute',
+        background: '#10b981',
+        color: 'white',
+        padding: '1.25rem',
+        borderRadius: '20px',
+        boxShadow: '0 15px 35px rgba(16, 185, 129, 0.4), 0 0 0 1px rgba(255,255,255,0.2)',
+        zIndex: 1000,
+        maxWidth: '300px',
+        ...style
+      }}
+    >
+      {/* Floating Pulse Effect */}
+      <motion.div
+        animate={{ scale: [1, 1.05, 1] }}
+        transition={{ repeat: Infinity, duration: 2 }}
+        style={{ position: 'absolute', inset: 0, borderRadius: '20px', border: '2px solid rgba(255,255,255,0.3)', pointerEvents: 'none' }}
+      />
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+         <span style={{ fontSize: '1.2rem' }}>🎓</span>
+         <span style={{ fontSize: '0.8rem', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '1.5px', opacity: 0.9 }}>Instructor Guide</span>
+      </div>
+      
+      <p style={{ fontSize: '1rem', margin: '0 0 1rem 0', fontWeight: 700, lineHeight: '1.4', color: '#fff' }}>
+        {text}
+      </p>
+
+      <button 
+        onClick={onDismiss}
+        style={{ 
+          width: '100%', 
+          padding: '8px', 
+          background: 'rgba(255,255,255,0.2)', 
+          border: '1px solid rgba(255,255,255,0.3)', 
+          color: 'white', 
+          borderRadius: '10px', 
+          fontSize: '0.85rem', 
+          fontWeight: 800, 
+          cursor: 'pointer',
+          transition: 'all 0.2s'
+        }}
+        onMouseEnter={(e) => e.target.style.background = 'rgba(255,255,255,0.3)'}
+        onMouseLeave={(e) => e.target.style.background = 'rgba(255,255,255,0.2)'}
+      >
+        Got it!
+      </button>
+      
+      {/* Arrow */}
+      <div style={{
+        position: 'absolute',
+        width: '16px',
+        height: '16px',
+        background: '#10b981',
+        transform: 'rotate(45deg)',
+        zIndex: -1,
+        ...(arrow === 'left' ? { left: '-8px', top: '50%', marginTop: '-8px' } : 
+           arrow === 'right' ? { right: '-8px', top: '50%', marginTop: '-8px' } :
+           arrow === 'top' ? { top: '-8px', left: '50%', marginLeft: '-8px' } :
+           { bottom: '-8px', left: '50%', marginLeft: '-8px' })
+      }} />
+    </motion.div>
+  );
+};
+
 const IdentitySafety = () => {
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -54,10 +128,16 @@ const IdentitySafety = () => {
   const [activeField, setActiveField] = useState(null);
   const [shuffledSites, setShuffledSites] = useState([]);
   const [selectedSiteIndex, setSelectedSiteIndex] = useState(null);
+  const [showGuide, setShowGuide] = useState(true);
 
   // Module B Refs
   const hotelRef = useRef(null);
   const bankRef = useRef(null);
+
+  // Auto-reset guide on module change
+  React.useEffect(() => {
+    if (activeModule) setShowGuide(true);
+  }, [activeModule]);
 
   const handleLessonSelect = (id) => {
     setActiveModule(id);
@@ -65,6 +145,7 @@ const IdentitySafety = () => {
     setSensitivityLevel(0);
     setActiveField(null);
     setSelectedSiteIndex(null);
+    setShowGuide(true);
     
     if (id === 3) {
       // Shuffle sites for randomization
@@ -225,6 +306,24 @@ const IdentitySafety = () => {
                    <div style={{ background: '#FF9F1C22', color: '#FF9F1C', padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 700 }}>LIVE SIMULATION</div>
                 </div>
 
+                {/* WALKTHROUGH Placeholder - Repositioned to Action Zone */}
+                <div style={{ background: 'rgba(34, 197, 94, 0.1)', borderLeft: '4px solid #22c55e', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontWeight: 800, fontSize: '0.8rem', marginBottom: '5px' }}>
+                      <ArrowDown size={16} /> WALKTHROUGH
+                   </div>
+                   <p style={{ fontSize: '0.95rem', margin: 0, fontWeight: 500 }}>
+                      {activeModule === 1 && (
+                        <span>
+                           {t('lesson1Instruction')} 
+                           <br />
+                           <span style={{ fontSize: '0.8rem', opacity: 0.8, color: '#22c55e' }}>{t('categoryPublicDesc')}</span>
+                        </span>
+                      )}
+                      {activeModule === 2 && "Drag the correct ID (Full or Masked) to the upload zones in both apps."}
+                      {activeModule === 3 && "Review both browser windows and click the website you think is authentic."}
+                   </p>
+                </div>
+
                 <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 
                 {/* Module A: Exposure Meter */}
@@ -264,6 +363,14 @@ const IdentitySafety = () => {
                                     }}
                                     placeholder={field === 'id' ? 'XXXX-XXXX-XXXX' : ''}
                                   />
+                                  {field === 'id' && !activeField && showGuide && (
+                                    <InstructorGuide 
+                                      text="Try clicking here. See how the meter on the right turns Red? This means the information is highly secret!"
+                                      style={{ left: '105%', top: '-20px' }}
+                                      arrow="left"
+                                      onDismiss={() => setShowGuide(false)}
+                                    />
+                                  )}
                                </div>
                              ))}
                              <button className="btn" style={{ background: '#1877f2', color: 'white', marginTop: '1rem', borderRadius: '8px' }}>
@@ -347,8 +454,7 @@ const IdentitySafety = () => {
                           </BrowserFrame>
                         </div>
                       </div>
-
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '1rem' }}>
+                       <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', padding: '1rem', position: 'relative' }}>
                         <motion.div drag dragSnapToOrigin onDragEnd={(e, i) => handleDragEnd(e, i, 'FULL')} className="glass-panel" style={{ width: '220px', padding: '1rem', cursor: 'grab', background: 'white', color: '#333', boxShadow: '0 4px 15px rgba(0,0,0,0.1)', border: '1px solid #eee' }}>
                            <p style={{ fontSize: '0.7rem', fontWeight: 800, margin: 0, opacity: 0.6, color: '#666' }}>OFFICIAL ID</p>
                            <p style={{ fontSize: '1.1rem', fontWeight: 700, letterSpacing: '1px', margin: '8px 0', color: '#000' }}>4567 8901 0000</p>
@@ -363,6 +469,14 @@ const IdentitySafety = () => {
                               <User size={16} /> <ShieldCheck size={16} color="#4ade80" />
                            </div>
                         </motion.div>
+                        {mistakes === 0 && !activeTip && showGuide && (
+                          <InstructorGuide 
+                            text="Pick up this card! It hides your sensitive numbers so you stay safe while sharing."
+                            style={{ top: '-110px', left: '70%' }}
+                            arrow="bottom"
+                            onDismiss={() => setShowGuide(false)}
+                          />
+                        )}
                       </div>
                    </div>
                 )}
@@ -387,7 +501,15 @@ const IdentitySafety = () => {
                               border: selectedSiteIndex === index ? `4px solid ${site.isReal ? '#4ade80' : '#ef4444'}` : '2px solid transparent'
                             }}
                           >
-                            <BrowserFrame url={site.url} status={selectedSiteIndex !== null ? (site.isReal ? 'secure' : 'insecure') : 'secure'}>
+                             <BrowserFrame url={site.url} status={selectedSiteIndex !== null ? (site.isReal ? 'secure' : 'insecure') : 'secure'}>
+                               {index === 1 && selectedSiteIndex === null && showGuide && (
+                                 <InstructorGuide 
+                                   text="Look closely here. Does the link look official, or is there a strange spelling?"
+                                   style={{ right: '105%', top: '10px' }}
+                                   arrow="right"
+                                   onDismiss={() => setShowGuide(false)}
+                                 />
+                               )}
                                <div style={{ padding: '2.5rem 1.5rem', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                                   {site.isReal ? (
                                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -429,18 +551,6 @@ const IdentitySafety = () => {
               <section style={{ padding: '2.5rem', background: 'var(--glass-bg)', display: 'flex', flexDirection: 'column', gap: '2rem', overflowY: 'auto' }}>
                 <div style={{ textAlign: 'center' }}>
                    <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#10B981' }}>{t('reflectionZone')}</span>
-                </div>
-
-                {/* Tutorial Instruction - NEW */}
-                <div style={{ background: 'rgba(255,159,28,0.1)', borderLeft: '4px solid #FF9F1C', padding: '1rem', borderRadius: '8px' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#FF9F1C', fontWeight: 800, fontSize: '0.8rem', marginBottom: '5px' }}>
-                      <Info size={16} /> TUTORIAL INSTRUCTION
-                   </div>
-                   <p style={{ fontSize: '0.95rem', margin: 0, fontWeight: 500 }}>
-                      {activeModule === 1 && "Click on each field in the social media profile to see its sensitivity level."}
-                      {activeModule === 2 && "Drag the correct ID (Full or Masked) to the upload zones in both apps."}
-                      {activeModule === 3 && "Review both browser windows and click the website you think is authentic."}
-                   </p>
                 </div>
 
                 <div style={{ flex: 1 }}>
