@@ -2,8 +2,9 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Globe, Sun, Moon, Smartphone, Lock, CreditCard, ShieldCheck } from 'lucide-react';
+import { Globe, ShieldCheck } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageSelector from '../components/LanguageSelector';
 import logo from '../assets/logo.png';
 import homeUser1 from '../assets/home_user1.jpg';
 import homeUser2 from '../assets/home_user2.jpg';
@@ -13,26 +14,16 @@ import homeUser4 from '../assets/home_user4.jpg';
 const homeImages = [homeUser1, homeUser2, homeUser3, homeUser4];
 
 const Home = () => {
-  const { language, changeLanguage, t } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(() => !sessionStorage.getItem('languageSelected'));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Modal will now show every time the component mounts
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % homeImages.length);
-    }, 3500); // Shuffle every 3.5 seconds
+    }, 3500);
     return () => clearInterval(timer);
   }, []);
-
-
-
-  const handleLanguageSelect = (lang) => {
-    changeLanguage(lang);
-    sessionStorage.setItem('languageSelected', 'true');
-    setShowModal(false);
-  };
 
   return (
     <div className="home-container" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
@@ -41,36 +32,7 @@ const Home = () => {
       <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '40vw', height: '40vw', background: 'radial-gradient(circle, rgba(59,130,246,0.15) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }}></div>
       <div style={{ position: 'absolute', bottom: '-20%', right: '-10%', width: '50vw', height: '50vw', background: 'radial-gradient(circle, rgba(255,159,28,0.1) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%', zIndex: 0, pointerEvents: 'none' }}></div>
 
-      {/* Language Selection Modal */}
-      {showModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0, left: 0, right: 0, bottom: 0,
-          backgroundColor: 'rgba(0,0,0,0.85)',
-          backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          zIndex: 1000, padding: '20px'
-        }}>
-          <div className="glass-panel animate-fade-in" style={{ maxWidth: '500px', width: '100%', textAlign: 'center', padding: '3rem' }}>
-            <Globe size={48} color="#FF9F1C" style={{ marginBottom: '1.5rem' }} />
-            <h2 style={{ marginBottom: '1.5rem', color: '#EAEAEA' }}>{t('chooseLanguage')}</h2>
-            <p style={{ marginBottom: '2.5rem', color: 'rgba(234,234,234,0.8)' }}>{t('selectLangTitle')}</p>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {['en', 'hi', 'mr'].map(lang => (
-                <button
-                  key={lang}
-                  className="btn btn-outline"
-                  style={{ width: '100%', padding: '1rem', border: language === lang ? '2px solid #FF9F1C' : '1px solid rgba(234,234,234,0.2)' }}
-                  onClick={() => handleLanguageSelect(lang)}
-                >
-                  {lang === 'en' ? 'English' : lang === 'hi' ? 'हिन्दी (Hindi)' : 'मराठी (Marathi)'}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
 
       <header className="glass-nav" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 50 }}>
         <div className="logo-section" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -81,9 +43,7 @@ const Home = () => {
         </div>
 
         <div className="theme-toggle" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button onClick={() => setShowModal(true)} className="btn btn-outline" title="Change Language" style={{ padding: '8px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <Globe size={18} />
-          </button>
+          <LanguageSelector />
           <ThemeToggle />
         </div>
       </header>

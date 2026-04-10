@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Key, Phone, User, AlertTriangle, Loader2 } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageSelector from '../components/LanguageSelector';
 import logo from '../assets/logo.png';
 
 const Login = () => {
@@ -82,7 +83,8 @@ const Login = () => {
 
   return (
     <div className="login-container flex-center" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '20px', position: 'relative' }}>
-      <div style={{ position: 'absolute', top: '2rem', right: '2rem' }}>
+      <div style={{ position: 'absolute', top: '2rem', right: '2rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <LanguageSelector />
         <ThemeToggle />
       </div>
       <div className="glass-panel animate-fade-in" style={{ width: '100%', maxWidth: '450px', padding: isCompact ? '24px' : '32px' }}>

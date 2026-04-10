@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Landmark, Building2, AlertCircle, Info, LogOut, Navigation } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageSelector from '../components/LanguageSelector';
 import bankBg from '../assets/bank_bg.png';
 import mncBg from '../assets/mnc_bg.jpg';
 import user1 from '../assets/user1.png';
@@ -53,6 +54,7 @@ const Dashboard = () => {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <LanguageSelector />
           <ThemeToggle />
           <button className="btn btn-outline" onClick={() => { localStorage.clear(); navigate('/'); }} style={{ padding: '8px 16px', fontSize: '0.9rem' }}>
             <LogOut size={16} /> {t('login')}

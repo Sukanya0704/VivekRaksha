@@ -5,6 +5,8 @@ import { ArrowLeft, ShieldCheck, ShieldX, PhoneIncoming, MessageSquareWarning, A
 import PageAudioButton from '../../components/PageAudioButton';
 import { playAudio } from '../../utils/audio';
 import { scenariosData } from '../../data/fraudScenarios';
+import { markLevelComplete } from '../../utils/levelProgress';
+import LanguageSelector from '../../components/LanguageSelector';
 
 const FraudSimulatorNew = () => {
   const { language } = useLanguage();
@@ -372,7 +374,7 @@ const FraudSimulatorNew = () => {
               {ui.tryAgainBtn}
             </button>
           )}
-          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => navigate('/dashboard')}>
+          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => markLevelComplete(3, navigate)}>
             {ui.returnBtn}
           </button>
         </div>
@@ -383,11 +385,14 @@ const FraudSimulatorNew = () => {
   return (
     <div className="module-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary, #020617)', padding: '2rem' }}>
       {/* Header */}
-      <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <ArrowLeft size={24} /> Back
-        </button>
-        <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.awarenessTitle}</h2>
+      <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <ArrowLeft size={24} /> Back
+          </button>
+          <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.awarenessTitle}</h2>
+        </div>
+        <LanguageSelector />
       </header>
 
       {/* Dynamic Content Area */}
