@@ -95,49 +95,51 @@ const UpiSimulator = () => {
     });
   }, []);
 
+  // Calculate instruction key for current step
+  let currentInstructionKey = '';
+  if (flow === 'home' && step === 1) currentInstructionKey = isTransactionComplete ? 'upiStepSuccessDone' : 'upiStep1';
+  else if (flow === 'qr' && step === 1) currentInstructionKey = 'upiStepScan';
+  else if (flow === 'mobile' && step === 1) currentInstructionKey = 'upiStepMobile';
+  else if ((flow === 'mobile' || flow === 'qr') && step === 2) currentInstructionKey = 'upiStepAmount';
+  else if ((flow === 'mobile' || flow === 'qr' || flow === 'balance') && step === 3) currentInstructionKey = 'upiStepPin';
+  else if (flow === 'balance' && step === 1) currentInstructionKey = 'upiStepBalance';
+  else if (flow === 'success') currentInstructionKey = 'upiStepSuccess';
+
   // Trigger audio instruction and update guide when step/flow changes
   useEffect(() => {
-    let instructionKey = '';
     let targetId = '';
 
     if (flow === 'home' && step === 1) {
-      instructionKey = isTransactionComplete ? 'upiStepSuccessDone' : 'upiStep1';
       targetId = isTransactionComplete ? 'btn-balance' : 'btn-to-mobile';
     }
     else if (flow === 'qr' && step === 1) {
-      instructionKey = 'upiStepScan';
       targetId = 'qr-detect-zone';
     }
     else if (flow === 'mobile' && step === 1) {
-      instructionKey = 'upiStepMobile';
       targetId = 'input-mobile';
     }
     else if ((flow === 'mobile' || flow === 'qr') && step === 2) {
-      instructionKey = 'upiStepAmount';
       targetId = 'input-amount';
     }
     else if ((flow === 'mobile' || flow === 'qr' || flow === 'balance') && step === 3) {
-      instructionKey = 'upiStepPin';
       targetId = 'pin-row';
     }
     else if (flow === 'balance' && step === 1) {
-      instructionKey = 'upiStepBalance';
       targetId = 'bank-card';
     }
     else if (flow === 'success') {
-      instructionKey = 'upiStepSuccess';
       targetId = 'success-screen';
     }
 
-    if (instructionKey) {
+    if (currentInstructionKey) {
       const timer = setTimeout(() => {
-        speak(t(instructionKey));
+        speak(t(currentInstructionKey));
         updateGuidePos(targetId);
       }, 600);
 
       const repeatInterval = setInterval(() => {
         if (!isSpeaking && !isMuted) {
-          speak(t(instructionKey));
+          speak(t(currentInstructionKey));
         }
       }, 12000);
 
@@ -146,7 +148,7 @@ const UpiSimulator = () => {
         clearInterval(repeatInterval);
       };
     }
-  }, [flow, step, t, speak, isSpeaking, isTransactionComplete, isMuted, updateGuidePos]);
+  }, [flow, step, t, speak, isSpeaking, isTransactionComplete, isMuted, updateGuidePos, currentInstructionKey]);
 
   // Handle successful payment redirection
   useEffect(() => {
@@ -628,27 +630,26 @@ const UpiSimulator = () => {
 
   return (
     <div className="module-page" style={{ 
-      height: '100vh', 
-      background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)', 
+      minHeight: '100vh', 
+      background: '#f0f2f5', 
       padding: '1rem',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      overflow: 'hidden'
     }}>
       {/* Top Header */}
       <div style={{ width: '100%', maxWidth: '1100px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <button onClick={() => navigate('/banking')} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white', background: 'rgba(255,255,255,0.1)', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.3s' }} onMouseOver={e=>e.target.style.background='rgba(255,255,255,0.2)'} onMouseOut={e=>e.target.style.background='rgba(255,255,255,0.1)'}>
+        <button onClick={() => navigate('/banking')} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#111827', background: 'rgba(0,0,0,0.05)', border: 'none', padding: '8px 16px', borderRadius: '20px', cursor: 'pointer', transition: 'all 0.3s' }} onMouseOver={e=>e.target.style.background='rgba(0,0,0,0.1)'} onMouseOut={e=>e.target.style.background='rgba(0,0,0,0.05)'}>
           <ArrowLeft size={18} /> {t('back')}
         </button>
         <div style={{ textAlign: 'center' }}>
-          <h1 style={{ fontSize: '1.8rem', fontWeight: '900', color: 'white', margin: 0, textShadow: '0 4px 10px rgba(0,0,0,0.3)' }}>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: '900', color: '#111827', margin: 0 }}>
             {t('moduleUPI')}
           </h1>
-          <p style={{ color: 'var(--phonepe-gold)', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', marginTop: '4px' }}>IMMERSIVE SANDBOX</p>
+          <p style={{ color: 'var(--phonepe-purple)', fontSize: '0.75rem', fontWeight: '800', letterSpacing: '2px', marginTop: '4px' }}>INTERACTIVE TRAINING</p>
         </div>
-        <div style={{ background: 'rgba(255,255,255,0.1)', color: 'white', borderRadius: '20px', padding: '8px 16px', fontSize: '0.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Shield size={16} color="var(--phonepe-gold)" /> SAFE MODE
+        <div style={{ background: 'rgba(95, 37, 159, 0.1)', color: 'var(--phonepe-purple)', borderRadius: '20px', padding: '8px 16px', fontSize: '0.8rem', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Shield size={16} color="var(--phonepe-purple)" /> LEARNING MODE
         </div>
       </div>
 
@@ -658,10 +659,52 @@ const UpiSimulator = () => {
         display: 'flex', 
         gap: '4rem', 
         justifyContent: 'center', 
-        alignItems: 'center',
+        paddingTop: '3vh',
+        paddingBottom: '3rem',
         flex: 1,
         position: 'relative'
       }}>
+        {/* Sidebar Info Panel (LEFT) */}
+        <div style={{ width: '360px', display: 'flex', flexDirection: 'column', gap: '1.5rem', alignSelf: 'center' }}>
+           <div style={{ background: 'white', borderRadius: '24px', padding: '1.5rem', border: '1px solid rgba(0,0,0,0.05)', color: '#111827', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <p style={{ fontSize: '0.75rem', fontWeight: '900', color: '#6b7280' }}>AUDIO CONTROLS</p>
+                <div style={{ padding: '4px 8px', borderRadius: '10px', background: isSpeaking ? 'rgba(95, 37, 159, 0.1)' : 'transparent', border: '1px solid rgba(95, 37, 159, 0.2)' }}>
+                  <p style={{ fontSize: '0.6rem', fontWeight: 'bold', color: 'var(--phonepe-purple)' }}>{isSpeaking ? 'SPEAKING...' : 'IDLE'}</p>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button 
+                  onClick={() => setIsMuted(!isMuted)}
+                  style={{ flex: 1, background: isMuted ? '#6b7280' : 'var(--phonepe-purple)', border: 'none', color: 'white', borderRadius: '15px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                  {isMuted ? <LucideIcons.VolumeX size={18} /> : <LucideIcons.Volume2 size={18} />}
+                  {isMuted ? 'Unmute' : 'Mute'}
+                </button>
+                <button 
+                  onClick={() => speak(t(currentInstructionKey))} 
+                  style={{ flex: 1, background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.1)', color: '#111827', borderRadius: '15px', padding: '10px', fontWeight: 'bold', cursor: 'pointer' }}
+                >
+                  Replay
+                </button>
+              </div>
+           </div>
+
+           <div style={{ width: '100%', overflow: 'hidden', whiteSpace: 'nowrap', padding: '15px 0', borderTop: '1px solid rgba(0,0,0,0.1)', background: 'white' }}>
+        <p className={language !== 'en' ? 'hi-text' : ''} style={{ display: 'inline-block', animation: 'marquee 25s linear infinite', color: 'var(--phonepe-purple)', fontSize: '0.9rem', fontWeight: 'bold', margin: 0, paddingLeft: '100%' }}>
+          {t('marqueeNote')}
+        </p>
+      </div>
+           <div style={{ background: 'white', borderRadius: '24px', padding: '2rem', border: '1px solid rgba(0,0,0,0.05)', color: '#111827', boxShadow: '0 10px 30px rgba(0,0,0,0.08)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--phonepe-purple)', marginBottom: '16px' }}>
+                <Info size={24} />
+                <span style={{ fontWeight: '900', fontSize: '1.1rem', letterSpacing: '0.5px' }}>EXPLANATION</span>
+              </div>
+              <p className={language !== 'en' ? 'hi-text' : ''} style={{ fontSize: '1.05rem', color: '#374151', lineHeight: '1.6', fontWeight: '500' }}>
+                {t(currentInstructionKey)}
+              </p>
+           </div>
+        </div>
         {/* Phone Mockup */}
         <div ref={phoneRef} style={{ 
           width: '320px', 
@@ -669,10 +712,11 @@ const UpiSimulator = () => {
           background: '#1a1a1a', 
           borderRadius: '50px', 
           padding: '12px', 
-          boxShadow: '0 50px 100px rgba(0,0,0,0.5), 0 0 0 4px #333',
+          boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25), 0 0 0 4px #333',
           position: 'relative',
           overflow: 'visible',
-          flexShrink: 0
+          flexShrink: 0,
+          alignSelf: 'center'
         }}>
           {/* Notch */}
           <div style={{ width: '100px', height: '30px', background: '#1a1a1a', position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', borderBottomLeftRadius: '18px', borderBottomRightRadius: '18px', zIndex: 100 }}></div>
@@ -687,44 +731,7 @@ const UpiSimulator = () => {
           </div>
 
           {/* Floating Guide (Relative to Phone) */}
-          <FloatingGuide />
-        </div>
-
-        {/* Sidebar Info Panel */}
-        <div style={{ width: '320px', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.1)', color: 'white', backdropFilter: 'blur(10px)' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--phonepe-gold)', marginBottom: '12px' }}>
-                <Shield size={22} />
-                <span style={{ fontWeight: '900', fontSize: '1rem', letterSpacing: '0.5px' }}>SAFE SIMULATION</span>
-              </div>
-              <p className={language !== 'en' ? 'hi-text' : ''} style={{ fontSize: '0.85rem', opacity: 0.8, lineHeight: '1.6', fontWeight: '500' }}>
-                {t('upiSafeInfo')} {t('townDisclaimer') || "Do not use your actual banking PIN or passwords here."}
-              </p>
-           </div>
-
-           <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: '24px', padding: '1.5rem', border: '1px solid rgba(255,255,255,0.1)', color: 'white' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <p style={{ fontSize: '0.75rem', fontWeight: '900', opacity: 0.6 }}>AUDIO CONTROLS</p>
-                <div style={{ padding: '4px 8px', borderRadius: '10px', background: isSpeaking ? 'rgba(95, 37, 159, 0.4)' : 'transparent', border: '1px solid rgba(95, 37, 159, 0.5)' }}>
-                  <p style={{ fontSize: '0.6rem', fontWeight: 'bold', color: 'var(--phonepe-light-purple)' }}>{isSpeaking ? 'SPEAKING...' : 'IDLE'}</p>
-                </div>
-              </div>
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <button 
-                  onClick={() => setIsMuted(!isMuted)}
-                  style={{ flex: 1, background: isMuted ? '#666' : 'var(--phonepe-purple)', border: 'none', color: 'white', borderRadius: '15px', padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'bold' }}
-                >
-                  {isMuted ? <LucideIcons.VolumeX size={18} /> : <LucideIcons.Volume2 size={18} />}
-                  {isMuted ? 'Unmute' : 'Mute'}
-                </button>
-                <button 
-                  onClick={() => speak(t(Object.keys(translations.en).find(k=>k.startsWith('upiStep') && t(k).includes(t(flow==='home'?'upiStep1':flow))) || 'upiStep1'))} 
-                  style={{ flex: 1, background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '15px', padding: '10px', fontWeight: 'bold', cursor: 'pointer' }}
-                >
-                  Replay
-                </button>
-              </div>
-           </div>
+          <FloatingGuide guidePos={guidePos} isMuted={isMuted} isSpeaking={isSpeaking} t={t} language={language} flow={flow} step={step} isTransactionComplete={isTransactionComplete} />
         </div>
       </div>
 

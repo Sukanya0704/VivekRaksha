@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { useTheme } from '../context/ThemeContext';
 import { Globe, Sun, Moon, Smartphone, Lock, CreditCard, ShieldCheck } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 import logo from '../assets/logo.png';
@@ -10,15 +9,13 @@ import homeUser1 from '../assets/home_user1.jpg';
 import homeUser2 from '../assets/home_user2.jpg';
 import homeUser3 from '../assets/home_user3.jpg';
 import homeUser4 from '../assets/home_user4.jpg';
-import homeUser5 from '../assets/home_user5.jpg';
 
 const homeImages = [homeUser1, homeUser2, homeUser3, homeUser4];
 
 const Home = () => {
   const { language, changeLanguage, t } = useLanguage();
-  const { theme } = useTheme();
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(() => !sessionStorage.getItem('languageSelected'));
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   // Modal will now show every time the component mounts
@@ -29,12 +26,7 @@ const Home = () => {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    const langSelected = sessionStorage.getItem('languageSelected');
-    if (!langSelected) {
-      setShowModal(true);
-    }
-  }, []);
+
 
   const handleLanguageSelect = (lang) => {
     changeLanguage(lang);
