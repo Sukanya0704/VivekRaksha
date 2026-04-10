@@ -17,9 +17,16 @@ export const LanguageProvider = ({ children }) => {
     localStorage.setItem('languageSelected', language);
   }, [language]);
 
-  // Optimized translation function avoiding recreation on every render
-  const t = useCallback((key) => {
-    return translations[language]?.[key] || translations['en']?.[key] || key;
+  // Optimized translation function with interpolation support
+  const t = useCallback((key, params = {}) => {
+    let text = translations[language]?.[key] || translations['en']?.[key] || key;
+    
+    // Simple interpolation for {variable}
+    Object.keys(params).forEach(param => {
+      text = text.replace(`{${param}}`, params[param]);
+    });
+    
+    return text;
   }, [language]);
 
   // Optimized setter for language

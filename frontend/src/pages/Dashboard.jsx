@@ -132,7 +132,7 @@ const Dashboard = () => {
                 <p style={{ fontSize: '1rem', color: '#EAEAEA', opacity: 0.9, marginBottom: '2rem', flex: 1, zIndex: 2 }}>
                    {t('mncDesc')}
                 </p>
-                <button className="btn btn-primary" onClick={handleMNCEntry} style={{ width: '100%', zIndex: 2, padding: '14px 24px', fontSize: '1.1rem' }}>
+                <button className="btn btn-warning" onClick={handleMNCEntry} style={{ width: '100%', zIndex: 2, padding: '14px 24px', fontSize: '1.1rem' }}>
                     {t('enterFacility')}
                 </button>
             </div>

@@ -112,12 +112,14 @@ export const translations = {
 
     // Module A: Hierarchy of Exposure
     sensitivityMeter: 'Sensitivity Meter',
+    lesson1Instruction: 'Click on each field in the social media profile to see its sensitivity level.',
     nameField: 'Full Name',
     phoneField: 'Phone Number',
     idField: 'Identity Number (Aadhaar/SSN)',
-    categoryPublic: 'Public',
-    categoryPrivate: 'Private',
-    categoryCritical: 'Critical',
+    categoryPublic: 'Public (Shareable with anyone)',
+    categoryPrivate: 'Private (Trusted Apps only)',
+    categoryCritical: 'Critical (Never Share)',
+    categoryPublicDesc: 'Public information like your name is generally safe to share on social profiles so friends can find you.',
     ruleExposure: 'Rule: Never share Red (Critical) items with elective strangers or over unverified calls.',
     clickedOnField: 'You clicked on {field}. This is {category}.',
 
