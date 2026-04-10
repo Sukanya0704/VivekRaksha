@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import * as LucideIcons from 'lucide-react';
+import { translations } from '../../translations';
 
 const { 
   ArrowLeft, ArrowRight, CheckCircle, ShieldAlert, Info, HelpCircle, 
@@ -16,7 +17,6 @@ const UpiSimulator = () => {
   // Refs
   const lastSpokenText = useRef('');
   const phoneRef = useRef(null);
-  const targetRefs = useRef({});
 
   // State for flow control
   const [flow, setFlow] = useState('home'); // home, qr, mobile, balance, success
@@ -24,11 +24,23 @@ const UpiSimulator = () => {
   const [amount, setAmount] = useState('');
   const [pin, setPin] = useState(['', '', '', '']);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [showBalance, setShowBalance] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [isTransactionComplete, setIsTransactionComplete] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [showBalance, setShowBalance] = useState(false);
   const [manualNumber, setManualNumber] = useState('');
+  const [transactionId] = useState(() => `VR${Math.floor(Math.random() * 10000000000)}`);
+  
+  const resetSimulator = useCallback(() => {
+    setFlow('home');
+    setStep(1);
+    setAmount('');
+    setPin(['', '', '', '']);
+    setShowBalance(false);
+    setSelectedContact(null);
+    setIsTransactionComplete(false);
+    setManualNumber('');
+  }, []);
   const [guidePos, setGuidePos] = useState({ top: 0, left: 0, show: false, side: 'right' });
 
   // Audio Instruction logic - Fixed Stutter
@@ -155,6 +167,8 @@ const UpiSimulator = () => {
     };
   }, []);
 
+
+
   const handlePinInput = (index, value) => {
     if (value.length > 1) return;
     const newPin = [...pin];
@@ -167,16 +181,7 @@ const UpiSimulator = () => {
     }
   };
 
-  const resetSimulator = () => {
-    setFlow('home');
-    setStep(1);
-    setAmount('');
-    setPin(['', '', '', '']);
-    setShowBalance(false);
-    setSelectedContact(null);
-    setIsTransactionComplete(false);
-    setManualNumber('');
-  };
+
 
   const handleManualNumberSubmit = () => {
     if (manualNumber.length >= 10) {
@@ -301,7 +306,7 @@ const UpiSimulator = () => {
           <p style={{ fontSize: '1rem', opacity: 0.9 }}>{t('upiStepSuccess').split('!')[0]} to {selectedContact?.name}</p>
           <div style={{ marginTop: '1.5rem', background: 'rgba(255,255,255,0.1)', padding: '0.8rem', borderRadius: '12px', width: '100%' }}>
               <p style={{ fontSize: '0.8rem' }}>{t('upiAmountLabel')}: ₹{amount}</p>
-              <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>Transaction ID: VR{Math.floor(Math.random() * 10000000000)}</p>
+              <p style={{ fontSize: '0.75rem', opacity: 0.7 }}>Transaction ID: {transactionId}</p>
           </div>
         </div>
       );
