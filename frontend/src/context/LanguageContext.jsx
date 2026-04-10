@@ -1,23 +1,42 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback, useEffect } from 'react';
 import { translations } from '../translations';
 
-const LanguageContext = createContext();
+const LanguageContext = createContext(null);
 
 export const useLanguage = () => useContext(LanguageContext);
 
 export const LanguageProvider = ({ children }) => {
-  const [language, setLanguage] = useState('en'); // 'en', 'hi', 'mr'
+  // Support multi-language based on what is chosen at the beginning (stored in localStorage)
+  // Default language state is 'en'
+  const [language, setLanguage] = useState(() => {
+    return localStorage.getItem('languageSelected') || 'en';
+  });
 
-  const t = (key) => {
-    return translations[language][key] || translations['en'][key] || key;
-  };
+  // Keep localStorage perfectly synced if setLanguage is somehow called indirectly
+  useEffect(() => {
+    localStorage.setItem('languageSelected', language);
+  }, [language]);
 
-  const changeLanguage = (lang) => {
+  // Optimized translation function avoiding recreation on every render
+  const t = useCallback((key) => {
+    return translations[language]?.[key] || translations['en']?.[key] || key;
+  }, [language]);
+
+  // Optimized setter for language
+  const changeLanguage = useCallback((lang) => {
     setLanguage(lang);
-  };
+  }, []);
+
+  // Performance Optimization: Context provider value is memoized to avoid 
+  // triggering deep re-renders across the app unless 'language' actually changes.
+  const contextValue = useMemo(() => ({
+    language,
+    changeLanguage,
+    t
+  }), [language, changeLanguage, t]);
 
   return (
-    <LanguageContext.Provider value={{ language, changeLanguage, t }}>
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Shield, Globe, ArrowRight } from 'lucide-react';
@@ -6,14 +6,7 @@ import { Shield, Globe, ArrowRight } from 'lucide-react';
 const Home = () => {
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
-
-  useEffect(() => {
-    const langSelected = localStorage.getItem('languageSelected');
-    if (!langSelected) {
-      setShowModal(true);
-    }
-  }, []);
+  const [showModal, setShowModal] = useState(() => !localStorage.getItem('languageSelected'));
 
   const handleLanguageSelect = (lang) => {
     changeLanguage(lang);
