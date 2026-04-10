@@ -1,591 +1,539 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
-import { ArrowLeft, Lock, ExternalLink, ShieldAlert, CheckCircle, Volume2, Search, Smartphone, AlertTriangle, PhoneCall, CreditCard, Globe, Shield, Wallet, Landmark } from 'lucide-react';
+import { ArrowLeft, ShieldCheck, ShieldX, Wallet, Landmark, ShieldAlert, ArrowRight, Smartphone, MessageCircle, AlertTriangle, Info, PlayCircle, ExternalLink, Lock, Globe } from 'lucide-react';
+import PageAudioButton from '../../components/PageAudioButton';
+import { playAudio } from '../../utils/audio';
+import { otpScenariosData } from '../../data/otpScenarios';
 
 const OtpSimulator = () => {
-  const { language, t } = useLanguage();
+  const { language } = useLanguage();
   const navigate = useNavigate();
-
-  const [step, setStep] = useState(1);
-  const [seniorMode] = useState(false);
-  const [activeScenario, setActiveScenario] = useState('tax');
+  
+  // App State Navigation
+  const [step, setStep] = useState('intro'); // intro, hub, quiz, final
+  const [activeCategory, setActiveCategory] = useState(null);
+  
+  // Quiz State
+  const [currentScenarioIdx, setCurrentScenarioIdx] = useState(0);
+  const [subStep, setSubStep] = useState('sms'); // 'sms' (showing message), 'sandbox' (showing input)
+  const [showResult, setShowResult] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(false);
+  const [score, setScore] = useState(0);
   const [inputVal, setInputVal] = useState('');
 
-  // 🔊 Helper for explicit text-to-speech
-  const speak = (textToRead, e) => {
-    if (e && e.stopPropagation) e.stopPropagation();
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
+  // 1. Get complete language data
+  const fullData = otpScenariosData[language] || otpScenariosData['en'];
+  
+  // 2. Filter data for the active category
+  const activeScenarios = activeCategory 
+    ? fullData.filter(s => s.category === activeCategory) 
+    : [];
 
-    setTimeout(() => {
-      // Split text into chunks to prevent TTS silently skipping long text
-      const sentences = textToRead.split(/(?<=[.!?])\s+/);
-      const voices = window.speechSynthesis.getVoices();
-
-      let targetLang = 'en-IN';
-      if (language === 'hi') targetLang = 'hi-IN';
-      if (language === 'mr') targetLang = 'mr-IN';
-
-      const nativeVoice = voices.find(v => v.lang.includes(targetLang) || v.lang.lang?.includes(language));
-
-      sentences.forEach((sentence) => {
-        if (!sentence.trim()) return;
-        const utterance = new SpeechSynthesisUtterance(sentence.trim());
-        utterance.lang = targetLang;
-        if (nativeVoice) utterance.voice = nativeVoice;
-        if (seniorMode) utterance.rate = 0.85;
-        window.speechSynthesis.speak(utterance);
-      });
-    }, 50);
-  };
-
-  useEffect(() => {
-    if (window.speechSynthesis) window.speechSynthesis.getVoices();
-    return () => {
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-    };
-  }, []);
-
-  const handleNextStep = (newStep, autoSpeakText = null) => {
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
-    setStep(newStep);
-    if (seniorMode && autoSpeakText) speak(autoSpeakText);
-  };
-
-  const currentFontSize = seniorMode ? '1.3rem' : '1.1rem';
-  const headingSize = seniorMode ? '2rem' : '1.5rem';
-
-  // Top-Level Audio Component
-  const PageAudioButton = ({ text }) => (
-    <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '2rem' }}>
-      <button
-        onClick={(e) => speak(text, e)}
-        className="btn btn-outline"
-        style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: currentFontSize, padding: '0.8rem 1.5rem', borderRadius: '30px', color: '#60A5FA', borderColor: '#60A5FA', background: 'rgba(96, 165, 250, 0.1)' }}
-        title="Listen to this page"
-        type="button"
-      >
-        <Volume2 size={24} /> {t('listenToPage') || 'Listen to Screen'}
-      </button>
-    </div>
-  );
-
-  // SCENARIO DATA WITH DYNAMIC QUESTIONS
-  const scenariosData = {
+  // Localization Dictionary (Hardcoded UI elements)
+  const tx = {
     en: {
-      tax: {
-        id: 'tax',
-        title: "Income Tax Refund Scam",
-        icon: <Landmark size={48} color="#10B981" />,
-        smsText: ["Dear Citizen", " your IT refund of ₹12,400 has been ", "approved", ". Verify your details here to receive it: ", "http://incometax-india-gov.org.in/refund"],
-        breakdown: [
-          { text: "Dear Citizen", explanation: "Generic greeting (Scammers rarely use your real name)" },
-          { text: "approved", explanation: "Creates false urgency and excitement" },
-          { text: "http://incometax-india-gov.org.in", explanation: "Fake link! Real government sites use '.gov.in'" }
-        ],
-        decision: {
-          question: "You received this Tax SMS. What do you do?",
-          options: [
-            { isDanger: true, text: "Click the link immediately to claim my refund.", nextStep: 5 },
-            { isSafe: true, text: "Wait and log into the official Income Tax portal later.", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "Income Tax Verification",
-        sandboxDetail: "Enter your PAN Number to receive refund:",
-        btnText: "Submit to get ₹12,400",
-        realLink: "https://www.incometax.gov.in",
-        fakeLink: "http://incometax-india-gov.org.in/refund"
-      },
-      kyc: {
-        id: 'kyc',
-        title: "Bank KYC Blocked Scam",
-        icon: <ShieldAlert size={48} color="#EF4444" />,
-        smsText: ["Dear Customer", " your bank account will be ", "BLOCKED today", ". Complete your KYC immediately to avoid suspension: ", "http://update-kyc-hdfc.net/verify"],
-        breakdown: [
-          { text: "Dear Customer", explanation: "Banks usually address you by your real name." },
-          { text: "BLOCKED today", explanation: "Creates extreme panic so you don't think straight." },
-          { text: "http://update-kyc-hdfc.net", explanation: "Fake link! Never update KYC through an SMS link." }
-        ],
-        decision: {
-          question: "The SMS claims your account is blocked TODAY. You are panicking. What do you do?",
-          options: [
-            { isDanger: true, text: "Quickly click the link to update my PAN so I can buy groceries.", nextStep: 5 },
-            { isSafe: true, text: "Ignore the SMS and call the official Customer Care number on my debit card.", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "Bank KYC Portal",
-        sandboxDetail: "Enter Account Number & OTP:",
-        btnText: "Verify KYC Now",
-        realLink: "Log in via Official App",
-        fakeLink: "http://update-kyc-hdfc.net/verify"
-      },
-      upi: {
-        id: 'upi',
-        title: "UPI Mistake Payment Scam",
-        icon: <Wallet size={48} color="#FF9F1C" />,
-        smsText: ["Hello sir", " I mistakenly sent you ", "₹50,000", ". My mother is in the hospital, please click here to return the money: ", "pay-refund-upi@ybl"],
-        breakdown: [
-          { text: "Hello sir", explanation: "Strangers using emotional manipulation." },
-          { text: "₹50,000", explanation: "They send a fake SMS saying money was credited." },
-          { text: "pay-refund-upi@ybl", explanation: "Clicking this and entering your PIN actually DEDUCTS money from your account." }
-        ],
-        decision: {
-          question: "A stranger is begging you to return ₹50,000 they accidentally transferred. What do you do?",
-          options: [
-            { isDanger: true, text: "Click the link they sent and enter my UPI PIN to reverse the payment.", nextStep: 5 },
-            { isSafe: true, text: "Tell them to contact their bank to initiate a formal RBI chargeback. Do nothing.", nextStep: 8 }
-          ]
-        },
-        sandboxMsg: "UPI App Payment Request",
-        sandboxDetail: "Enter UPI PIN to process refund:",
-        btnText: "Pay ₹50,000",
-        realLink: "Check your actual Bank Balance via app",
-        fakeLink: "Click the SMS payment link"
-      }
+      title: "OTP & Link Scams Simulator",
+      introBasic: "Link and OTP scams are the most common way Indians lose money daily. Scammers send fake SMS alerts causing panic, forcing you to click malicious links and enter your hidden OTPs.",
+      rule1: "Rule 1: Never forward SMS starting with 'V' or 'F' - it redirects your OTPs.",
+      rule2: "Rule 2: Don't trust domains that look real (e.g. sbi-update.in). Look for exact spelling.",
+      rule3: "Rule 3: Scammers already know your PAN. Don't trust callers just because they recite it.",
+      startBtn: "Start Interactive Training",
+      hubTitle: "Select a Fraud Category to Practice",
+      hubTax: "Income Tax Refunds",
+      hubKYC: "Bank KYC & Wallets",
+      hubUPI: "UPI Payment Reversals",
+      sidePanelWait: "Make a decision on the left to see the detailed analysis here.",
+      sidePanelTitle: "Result Analysis",
+      correctTitle: "Correct Choice!",
+      wrongTitle: "Dangerous Mistake!",
+      redFlags: "Red Flags Detected:",
+      whyWrong: "Consequence of mistake:",
+      whyCorrect: "Why you are safe:",
+      nextScenario: "Next Scenario",
+      scoreText: "Training Complete!",
+      returnBtn: "Back to Dashboard",
+      tryAgainBtn: "Retest Category",
+      perfectScore: "Excellent work, {name}! You scored 100% and are completely secure from cyber frauds!",
+      imperfectScore: "You made some dangerous mistakes, {name}. Would you like to retake the test to achieve a perfect 100% score?",
+      actionQuestion: "New Message Received",
+      btnIgnore: "Delete Message",
+      btnOpen: "Tap Link",
+      sandboxWarning: "⚠️ SIMULATION MODE",
+      introAudio: "Welcome to the OTP and Link Simulator. Let's learn how to spot dangerous web pages and protect your passwords.",
+      hubAudio: "Select a module to begin interacting with real world scams. Tax, KYC, or UPI."
     },
     hi: {
-      tax: {
-        id: 'tax',
-        title: "इनकम टैक्स रिफंड घोटाला",
-        icon: <Landmark size={48} color="#10B981" />,
-        smsText: ["प्रिय नागरिक", " आपका ₹12,400 का IT रिफंड ", "स्वीकृत", " हो गया है। इसे प्राप्त करने के लिए यहां सत्यापित करें: ", "http://incometax-india-gov.org.in/refund"],
-        breakdown: [
-          { text: "प्रिय नागरिक", explanation: "सामान्य संबोधन (ठग शायद ही कभी आपके असली नाम का उपयोग करते हैं)" },
-          { text: "स्वीकृत", explanation: "झूठी जल्दबाजी और उत्साह पैदा करता है" },
-          { text: "http://incometax-india-gov.org.in", explanation: "फर्जी लिंक! असली साइटें .gov.in पर समाप्त होती हैं" }
-        ],
-        decision: {
-          question: "आपको यह टैक्स SMS प्राप्त हुआ। आप क्या करते हैं?",
-          options: [
-            { isDanger: true, text: "अपना रिफंड तुरंत प्राप्त करने के लिए लिंक पर क्लिक करें।", nextStep: 5 },
-            { isSafe: true, text: "प्रतीक्षा करें और बाद में आधिकारिक आयकर पोर्टल पर लॉग इन करें।", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "आयकर सत्यापन",
-        sandboxDetail: "रिफंड प्राप्त करने के लिए अपना PAN दर्ज करें:",
-        btnText: "रिफंड प्राप्त करने के लिए सबमिट करें",
-        realLink: "https://www.incometax.gov.in",
-        fakeLink: "http://incometax-india-gov.org.in/refund"
-      },
-      kyc: {
-        id: 'kyc',
-        title: "बैंक KYC ब्लॉक घोटाला",
-        icon: <ShieldAlert size={48} color="#EF4444" />,
-        smsText: ["प्रिय ग्राहक", " आपका बैंक खाता ", "आज ब्लॉक", " कर दिया जाएगा। इसे बचने के लिए तुरंत अपनी KYC पूरी करें: ", "http://update-kyc-hdfc.net/verify"],
-        breakdown: [
-          { text: "प्रिय ग्राहक", explanation: "बैंक आमतौर पर आपको आपके असली नाम से संबोधित करते हैं।" },
-          { text: "आज ब्लॉक", explanation: "अत्यधिक दहशत पैदा करता है।" },
-          { text: "http://update-kyc-hdfc.net", explanation: "फर्जी लिंक! कभी भी SMS लिंक के जरिए KYC अपडेट न करें।" }
-        ],
-        decision: {
-          question: "SMS का दावा है कि आपका खाता आज ही ब्लॉक कर दिया गया है। आप घबरा रहे हैं। आप क्या करते हैं?",
-          options: [
-            { isDanger: true, text: "अपना पैन अपडेट करने के लिए जल्दी से लिंक पर क्लिक करें ताकि आप किराने का सामान खरीद सकें।", nextStep: 5 },
-            { isSafe: true, text: "SMS को अनदेखा करें और अपने डेबिट कार्ड के पीछे आधिकारिक कस्टमर केयर नंबर पर कॉल करें।", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "बैंक KYC पोर्टल",
-        sandboxDetail: "खाता नंबर और OTP दर्ज करें:",
-        btnText: "अभी KYC सत्यापित करें",
-        realLink: "आधिकारिक ऐप के माध्यम से लॉग इन करें",
-        fakeLink: "http://update-kyc-hdfc.net/verify"
-      },
-      upi: {
-        id: 'upi',
-        title: "UPI गलत पेमेंट घोटाला",
-        icon: <Wallet size={48} color="#FF9F1C" />,
-        smsText: ["नमस्ते सर", " मैंने गलती से आपको ", "₹50,000", " भेज दिए हैं। मेरी माँ अस्पताल में है, कृपया पैसे वापस करने के लिए यहाँ क्लिक करें: ", "pay-refund-upi@ybl"],
-        breakdown: [
-          { text: "नमस्ते सर", explanation: "भावनात्मक हेरफेर का उपयोग करने वाले अजनबी।" },
-          { text: "₹50,000", explanation: "वे पैसा प्राप्त होने का झूठा SMS भेजते हैं।" },
-          { text: "pay-refund-upi@ybl", explanation: "इस पर क्लिक करने और अपना पिन दर्ज करने से वास्तव में आपके खाते से पैसे कट जाते हैं।" }
-        ],
-        decision: {
-          question: "एक अजनबी आपसे ₹50,000 वापस करने की भीख मांग रहा है जो उसने गलती से ट्रांसफर कर दिए हैं। आप क्या करते हैं?",
-          options: [
-            { isDanger: true, text: "उनके द्वारा भेजे गए लिंक पर क्लिक करें और भुगतान वापस करने के लिए अपना UPI पिन दर्ज करें।", nextStep: 5 },
-            { isSafe: true, text: "उन्हें अपने बैंक से संपर्क करके औपचारिक RBI चार्जबैक शुरू करने को कहें। कुछ न करें।", nextStep: 8 }
-          ]
-        },
-        sandboxMsg: "UPI ऐप भुगतान अनुरोध",
-        sandboxDetail: "पैसे वापस करने के लिए UPI पिन दर्ज करें:",
-        btnText: "₹50,000 का भुगतान करें",
-        realLink: "ऐप के माध्यम से अपना वास्तविक बैंक बैलेंस जांचें",
-        fakeLink: "SMS भुगतान लिंक पर क्लिक करना"
-      }
+      title: "ओटीपी (OTP) और लिंक घोटाला सिम्युलेटर",
+      introBasic: "लिंक और OTP घोटाले सबसे आम तरीके हैं जिनसे भारतीय रोजाना पैसे खोते हैं। ठग फर्जी SMS भेजकर घबराहट पैदा करते हैं, ताकि आप दुर्भावनापूर्ण लिंक पर क्लिक करें और अपना छिपा हुआ OTP दर्ज करें।",
+      rule1: "नियम 1: 'V' या 'F' से शुरू होने वाले SMS को कभी फॉरवर्ड न करें - यह आपके OTP को रीडायरेक्ट करता है।",
+      rule2: "नियम 2: असली दिखने वाले डोमेन (जैसे sbi-update.in) पर भरोसा न करें। सटीक स्पेलिंग देखें।",
+      rule3: "नियम 3: ठग पहले से ही आपका PAN जानते हैं। इसके आधार पर कभी OTP साझा न करें।",
+      startBtn: "इंटरैक्टिव प्रशिक्षण शुरू करें",
+      hubTitle: "अभ्यास करने के लिए धोखाधड़ी क्षेणी का चयन करें",
+      hubTax: "आयकर रिफंड घोटाले",
+      hubKYC: "बैंक KYC और वॉलेट घोटाले",
+      hubUPI: "UPI भुगतान उलटफेर",
+      sidePanelWait: "विस्तृत विश्लेषण यहाँ देखने के लिए बाईं ओर निर्णय लें।",
+      sidePanelTitle: "परिणाम विश्लेषण",
+      correctTitle: "सही विकल्प!",
+      wrongTitle: "खतरनाक गलती!",
+      redFlags: "खतरे के संकेत:",
+      whyWrong: "गलती का परिणाम:",
+      whyCorrect: "आप सुरक्षित क्यों हैं:",
+      nextScenario: "अगला परिदृश्य",
+      scoreText: "प्रशिक्षण पूर्ण!",
+      returnBtn: "डैशबोर्ड पर वापस लौटें",
+      tryAgainBtn: "पुनः टेस्ट दें",
+      perfectScore: "बहुत बढ़िया काम, {name}! आपने 100% स्कोर किया है और आप साइबर धोखाधड़ी से पूरी तरह सुरक्षित हैं!",
+      imperfectScore: "आपने कुछ खतरनाक गलतियाँ की हैं, {name}। क्या आप सही स्कोर प्राप्त करने के लिए फिर से टेस्ट देना चाहेंगे?",
+      actionQuestion: "नया संदेश प्राप्त हुआ",
+      btnIgnore: "संदेश हटाएं",
+      btnOpen: "लिंक पर क्लिक करें",
+      sandboxWarning: "⚠️ सिमुलेशन मोड",
+      introAudio: "ओटीपी और लिंक सिम्युलेटर में आपका स्वागत है। आइए जानें कि खतरनाक वेब पेजों को कैसे पहचानें।",
+      hubAudio: "वास्तविक दुनिया के घोटालों के साथ बातचीत शुरू करने के लिए एक मॉड्यूल का चयन करें। कर, केवाईसी, या यूपीआई।"
     },
     mr: {
-      tax: {
-        id: 'tax',
-        title: "इन्कम टॅक्स रिफंड घोटाळा",
-        icon: <Landmark size={48} color="#10B981" />,
-        smsText: ["प्रिय नागरिक", " तुमचा ₹12,400 चा IT रिफंड ", "मंजूर", " झाला आहे. तो मिळवण्यासाठी येथे पडताळणी करा: ", "http://incometax-india-gov.org.in/refund"],
-        breakdown: [
-          { text: "प्रिय नागरिक", explanation: "सामान्य ग्रीटिंग (खरे नाव वापरत नाहीत)" },
-          { text: "मंजूर", explanation: "खोटी घाई आणि उत्साह निर्माण करते" },
-          { text: "http://incometax-india-gov.org.in", explanation: "खोटी लिंक! खऱ्या साइट्स .gov.in ने संपतात" }
-        ],
-        decision: {
-          question: "तुम्हाला हा टॅक्स SMS प्राप्त झाला. तुम्ही काय करता?",
-          options: [
-            { isDanger: true, text: "रिफंड त्वरित मिळवण्यासाठी त्वरित लिंकवर क्लिक करा.", nextStep: 5 },
-            { isSafe: true, text: "थांबा आणि नंतर अधिकृत इन्कम टॅक्स पोर्टलवर लॉग इन करा.", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "इन्कम टॅक्स पडताळणी",
-        sandboxDetail: "रिफंड मिळवण्यासाठी तुमचा पॅन (PAN) नंबर टाका:",
-        btnText: "रिफंड मिळवण्यासाठी सबमिट करा",
-        realLink: "https://www.incometax.gov.in",
-        fakeLink: "http://incometax-india-gov.org.in/refund"
-      },
-      kyc: {
-        id: 'kyc',
-        title: "बँक KYC ब्लॉक घोटाळा",
-        icon: <ShieldAlert size={48} color="#EF4444" />,
-        smsText: ["प्रिय ग्राहक", " तुमचे बँक खाते ", "आज ब्लॉक", " केले जाईल. हे टाळण्यासाठी त्वरित तुमची KYC पूर्ण करा: ", "http://update-kyc-hdfc.net/verify"],
-        breakdown: [
-          { text: "प्रिय ग्राहक", explanation: "बँका सहसा तुम्हाला तुमच्या खऱ्या नावाने बोलावतात." },
-          { text: "आज ब्लॉक", explanation: "भीती निर्माण करते जेणेकरून तुम्ही विचार करणार नाही." },
-          { text: "http://update-kyc-hdfc.net", explanation: "खोटी लिंक! कधीही SMS लिंकद्वारे KYC अपडेट करू नका." }
-        ],
-        decision: {
-          question: "SMS चा दावा आहे की तुमचे खाते आजच ब्लॉक केले गेले आहे. तुम्ही घाबरलेले आहात. तुम्ही काय करता?",
-          options: [
-            { isDanger: true, text: "तुमचा पॅन अपडेट करण्यासाठी पटकन लिंकवर क्लिक करा जेणेकरून तुम्ही किराणा सामान खरेदी करू शकाल.", nextStep: 5 },
-            { isSafe: true, text: "SMS कडे दुर्लक्ष करा आणि तुमच्या डेबिट कार्डच्या मागे असलेल्या अधिकृत कस्टमर केअर नंबरवर कॉल करा.", nextStep: 7 }
-          ]
-        },
-        sandboxMsg: "बँक KYC पोर्टल",
-        sandboxDetail: "खाते नंबर आणि OTP टाका:",
-        btnText: "आत्ता KYC सत्यापित करा",
-        realLink: "अधिकृत अॅपद्वारे लॉग इन करा",
-        fakeLink: "http://update-kyc-hdfc.net/verify"
-      },
-      upi: {
-        id: 'upi',
-        title: "UPI चुकीचे पेमेंट घोटाळा",
-        icon: <Wallet size={48} color="#FF9F1C" />,
-        smsText: ["नमस्ते सर", " मी चुकून तुम्हाला ", "₹50,000", " पाठवले आहेत. माझी आई रुग्णालयात आहे, कृपया पैसे परत करण्यासाठी येथे क्लिक करा: ", "pay-refund-upi@ybl"],
-        breakdown: [
-          { text: "नमस्ते सर", explanation: "भावनिक हाताळणी करणारे अनोळखी लोक." },
-          { text: "₹50,000", explanation: "ते पैसे जमा झाल्याचा खोटा SMS पाठवतात." },
-          { text: "pay-refund-upi@ybl", explanation: "यावर क्लिक करून तुमचा पिन टाकल्यास तुमच्या खात्यातून पैसे दुप्पट कापले जातात." }
-        ],
-        decision: {
-          question: "एक अनोळखी व्यक्ती चुकून ट्रान्सफर झालेले ₹50,000 परत करण्याची विनंती करत आहे. तुम्ही काय करता?",
-          options: [
-            { isDanger: true, text: "त्यांनी पाठवलेल्या लिंकवर क्लिक करा आणि पेमेंट उलट करण्यासाठी तुमचा UPI पिन टाका.", nextStep: 5 },
-            { isSafe: true, text: "त्यांना त्यांच्या बँकेशी संपर्क साधून औपचारिक RBI चार्जबॅक सुरू करण्यास सांगा. काहीही करू नका.", nextStep: 8 }
-          ]
-        },
-        sandboxMsg: "UPI अॅप पेमेंट विनंती",
-        sandboxDetail: "पैसे परत करण्यासाठी UPI पिन टाका:",
-        btnText: "₹50,000 भरा",
-        realLink: "अॅपद्वारे तुमचे वास्तविक बँक बॅलन्स तपासा",
-        fakeLink: "SMS पेमेंट लिंकवर क्लिक करणे"
-      }
+      title: "OTP आणि लिंक घोटाळे सिम्युलेटर",
+      introBasic: "भारतीयांचे दररोज पैसे बुडण्याचा सर्वात सामान्य मार्ग म्हणजे लिंक आणि OTP ची फसवणूक. फसवणूक करणारे खोटे SMS पाठवून भीती निर्माण करतात, जेणेकरून तुम्ही धोकादायक लिंकवर क्लिक करा आणि तुमचे OTP टाकावे.",
+      rule1: "नियम 1: 'V' किंवा 'F' ने सुरू होणारे SMS कधीही फॉरवर्ड करू नका - यामुळे तुमचे OTP त्यांच्याकडे जातात.",
+      rule2: "नियम 2: खऱ्या वाटणाऱ्या डोमेनवर (उदा. sbi-update.in) विश्वास ठेवू नका. स्पेलिंग नीट तपासा.",
+      rule3: "नियम 3: ठगांना तुमचे पॅन नंबर आधीच माहीत असतात. त्यामुळे घाबरून OTP देऊ नका.",
+      startBtn: "परस्परसंवादी प्रशिक्षण सुरू करा",
+      hubTitle: "सराव करण्यासाठी श्रेणी निवडा",
+      hubTax: "आयकर रिफंड घोटाळे",
+      hubKYC: "बँक KYC आणि वॉलेट घोटाळे",
+      hubUPI: "UPI पेमेंट रिव्हर्सल घोटाळे",
+      sidePanelWait: "सविस्तर विश्लेषण पाहण्यासाठी डावीकडे निर्णय घ्या.",
+      sidePanelTitle: "परिणाम विश्लेषण",
+      correctTitle: "प्रचंड बरोबर!",
+      wrongTitle: "भयानक चूक!",
+      redFlags: "धोक्याची चिन्हे:",
+      whyWrong: "चुकीचा परिणाम:",
+      whyCorrect: "तुम्ही सुरक्षित का आहात:",
+      nextScenario: "पुढील परिदृश्य",
+      scoreText: "प्रशिक्षण पूर्ण!",
+      returnBtn: "डॅशबोर्डवर परत जा",
+      tryAgainBtn: "पुन्हा टेस्ट द्या",
+      perfectScore: "उत्कृष्ट काम, {name}! तुम्हाला 100% गुण मिळाले आहेत आणि तुम्ही सायबर फसवणुकीपासून पूर्णपणे सुरक्षित आहात!",
+      imperfectScore: "तुम्ही काही धोकादायक चुका केल्या आहेत, {name}. १००% गुण मिळवण्यासाठी तुम्हाला पुन्हा टेस्ट द्यायला आवडेल का?",
+      actionQuestion: "नवीन संदेश प्राप्त झाला",
+      btnIgnore: "संदेश हटवा",
+      btnOpen: "लिंकवर टॅप करा",
+      sandboxWarning: "⚠️ सिम्युलेशन मोड",
+      introAudio: "ओटीपी सिम्युलेटरमध्ये आपले स्वागत आहे. चला खतरनाक वेब पृष्ठे कशी ओळखावी आणि आपला पासवर्ड कसा संरक्षित करावा हे शिकूया.",
+      hubAudio: "सराव करण्यासाठी श्रेणी निवडा. टॅक्स, बँक केवाईसी, किंवा यूपीआय."
+    }
+  };
+  const ui = tx[language] || tx['en'];
+
+  // --- LOGIC HANDLERS ---
+  const handleCategorySelect = (category) => {
+    setActiveCategory(category);
+    setCurrentScenarioIdx(0);
+    setScore(0);
+    setStep('quiz');
+    setSubStep('sms');
+    setShowResult(false);
+  };
+
+  const handleDecisionSecure = () => {
+    // User chose to "Delete Message"
+    const scenario = activeScenarios[currentScenarioIdx];
+    
+    if (scenario.isLegitimate) {
+      // Deleted a real, important message - Wrong!
+      setIsCorrect(false);
+      let audioText = `${ui.wrongTitle}. ${ui.whyWrong} ${scenario.consequenceWrong}`;
+      playAudio(audioText, language);
+    } else {
+      // Ignored a scam - Secure & Correct!
+      setIsCorrect(true);
+      setScore(score + 1);
+      let audioText = `${ui.correctTitle}. ${ui.whyCorrect} ${scenario.explanationRight}`;
+      playAudio(audioText, language);
+    }
+    setShowResult(true);
+  };
+
+  const handleDecisionOpenLink = () => {
+    // User chose to open the malicious link -> Enter Sandbox mode!
+    setSubStep('sandbox');
+    setInputVal('');
+  };
+
+  const handleSandboxSubmit = () => {
+    // User typed into the portal and clicked submit
+    const scenario = activeScenarios[currentScenarioIdx];
+    
+    if (scenario.isLegitimate) {
+      // Submitted details into an official, secure portal - Correct!
+      setIsCorrect(true);
+      setScore(score + 1);
+      let audioText = `${ui.correctTitle}. ${ui.whyCorrect} ${scenario.explanationRight}`;
+      playAudio(audioText, language);
+    } else {
+      // Submitted details to a phishing portal - Danger!
+      setIsCorrect(false);
+      let audioText = `${ui.wrongTitle}. ${ui.whyWrong} ${scenario.consequenceWrong}`;
+      playAudio(audioText, language);
+    }
+    setShowResult(true);
+  };
+
+  const nextScenario = () => {
+    if (currentScenarioIdx < activeScenarios.length - 1) {
+      setCurrentScenarioIdx(currentScenarioIdx + 1);
+      setSubStep('sms');
+      setShowResult(false);
+      setInputVal('');
+    } else {
+      setStep('final');
     }
   };
 
-  const getActiveData = () => {
-    const langData = scenariosData[language] || scenariosData['en'];
-    return langData[activeScenario];
-  };
 
-  // VIEWS
-  const renderStepOne = () => (
-    <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center' }}>
-      <PageAudioButton text={`${t('otpGoldenRule')}. ${t('otpGoldenRuleDesc')}. ${t('otpSafe')}. ${t('otpSafeDesc')}. ${t('otpDanger')}. ${t('otpDangerDesc')}`} />
-      <Lock size={64} color="#EF4444" style={{ marginBottom: '1.5rem', marginTop: '1rem' }} />
-      <h3 style={{ fontSize: headingSize, marginBottom: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        {t('otpGoldenRule')}
-      </h3>
-      <p style={{ fontSize: currentFontSize, color: 'rgba(234, 234, 234, 0.9)', marginBottom: '2rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        "{t('otpGoldenRuleDesc')}"
-      </p>
-      <div style={{ display: 'grid', gridTemplateColumns: seniorMode ? '1fr' : 'repeat(2, 1fr)', gap: '1.5rem', textAlign: 'left' }}>
-        <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '1.5rem', borderRadius: '12px', border: '5px solid #10B981' }}>
-          <p style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#10B981', marginBottom: '0.5rem', display: 'flex', alignItems: 'center' }}>
-            {t('otpSafe')}
-          </p>
-          <p style={{ fontSize: currentFontSize, display: 'flex', alignItems: 'center' }}>
-            {t('otpSafeDesc')}
-          </p>
-        </div>
-        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '1.5rem', borderRadius: '12px', border: '5px solid #EF4444' }}>
-          <p style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#EF4444', marginBottom: '0.5rem', display: 'flex', alignItems: 'center' }}>
-            {t('otpDanger')}
-          </p>
-          <p style={{ fontSize: currentFontSize, display: 'flex', alignItems: 'center' }}>
-            {t('otpDangerDesc')}
-          </p>
-        </div>
-      </div>
-      <div style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', justifyContent: 'center' }}>
-        <button className="btn btn-primary" style={{ padding: '1.5rem', fontSize: '1.2rem' }} onClick={() => handleNextStep(2, t('scenarioHubTitle'))}>
-          {t('readyStartSimulation')}
-        </button>
-      </div>
-    </div>
-  );
+  // --- VIEWS ---
 
-  const renderStepTwoHub = () => {
-    const langData = scenariosData[language] || scenariosData['en'];
-    const speakText = `${t('scenarioHubTitle')}. ` + Object.keys(langData).map(k => langData[k].title).join('. ');
+  const renderIntro = () => {
     return (
-      <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center' }}>
-        <PageAudioButton text={speakText} />
-        <h3 style={{ fontSize: headingSize, marginBottom: '3rem', marginTop: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {t('scenarioHubTitle')}
-        </h3>
+      <div className="glass-panel animate-fade-in" style={{ padding: '1.5rem 3rem', maxWidth: '1000px', margin: '0 auto', textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ marginBottom: '1rem', animation: 'slideInLeft 0.5s ease-out' }}>
+          <PageAudioButton text={ui.introAudio} />
+        </div>
+        
+        <Lock size={48} color="#EF4444" style={{ marginBottom: '0.8rem', display: 'inline-block', animation: 'scaleIn 0.5s ease-out' }} />
+        
+        <h2 className="title-xl" style={{ marginBottom: '1rem', color: '#60A5FA', fontSize: '2.2rem', animation: 'slideInRight 0.5s ease-out' }}>
+          {ui.title}
+        </h2>
+        
+        <div style={{ background: 'rgba(30, 41, 59, 0.7)', padding: '1.5rem 2rem', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid #334155', animation: 'scaleIn 0.6s ease-out' }}>
+          <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#E2E8F0', marginBottom: '1.5rem' }}>
+            {ui.introBasic}
+          </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem', maxWidth: '1000px', margin: '0 auto' }}>
-          {Object.keys(langData).map((key) => (
-            <div
-              key={key}
-              onClick={() => { setActiveScenario(key); handleNextStep(3); }}
-              style={{
-                background: '#2A2A2A',
-                borderRadius: '24px',
-                padding: '2rem',
-                cursor: 'pointer',
-                border: '3px solid #4B5563',
-                transition: 'transform 0.2s, borderColor 0.2s',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '1.5rem'
-              }}
-              onMouseOver={(e) => { e.currentTarget.style.borderColor = '#3B82F6'; e.currentTarget.style.transform = 'translateY(-5px)'; }}
-              onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
-            >
-              {langData[key].icon}
-              <h4 style={{ fontSize: currentFontSize, fontWeight: 'bold' }}>{langData[key].title}</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'left' }}>
+            <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10B981', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.3s' }}>
+              <h3 style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><ShieldCheck size={20} /> Advanced</h3>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule1}</p>
             </div>
-          ))}
-        </div>
-      </div>
-    )
-  };
-
-  const renderStepThreeBreakdown = () => {
-    const data = getActiveData();
-    const speakText = `${t('spotTheScam')}. ${data.smsText.join("")}. ` + data.breakdown.map(i => `${i.text}. ${i.explanation}`).join('. ');
-    return (
-      <div className="glass-panel animate-fade-in" style={{ padding: '2rem' }}>
-        <PageAudioButton text={speakText} />
-        <h3 style={{ fontSize: headingSize, textAlign: 'center', marginBottom: '2rem', color: '#FF9F1C', marginTop: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          <Search size={28} style={{ marginRight: '10px' }} />
-          {t('spotTheScam')}
-        </h3>
-
-        <div style={{ background: '#e5e7eb', color: '#1a1a1a', padding: '2rem', borderRadius: '16px', marginBottom: '2rem', fontSize: currentFontSize, display: 'flex', alignItems: 'center' }}>
-          <div>
-            <span style={{ backgroundColor: '#FCA5A5', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold' }}>{data.smsText[0]}</span>
-            {data.smsText[1]}
-            <span style={{ backgroundColor: '#FCA5A5', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold' }}>{data.smsText[2]}</span>
-            {data.smsText[3]}
-            <span style={{ backgroundColor: '#FCA5A5', padding: '4px 8px', borderRadius: '4px', fontWeight: 'bold', wordBreak: 'break-all' }}>{data.smsText[4]}</span>
+            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.5s' }}>
+              <h3 style={{ color: '#FCA5A5', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><Globe size={20} /> Identity</h3>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule2}</p>
+            </div>
+            <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #F59E0B', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.7s' }}>
+              <h3 style={{ color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><AlertTriangle size={20} /> Critical</h3>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule3}</p>
+            </div>
           </div>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-          {data.breakdown.map((item, index) => (
-            <div key={index} style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '6px solid #EF4444', padding: '1.5rem', borderRadius: '0 8px 8px 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <p style={{ fontWeight: 'bold', color: '#EF4444', marginBottom: '0.5rem', fontSize: currentFontSize }}>"{item.text}"</p>
-                <p style={{ fontSize: currentFontSize }}>{item.explanation}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button className="btn btn-primary" style={{ width: '100%', marginTop: '2rem', padding: '1.5rem', fontSize: '1.3rem' }} onClick={() => handleNextStep(4)}>
-          {t('nextStep') || 'Continue'}
-        </button>
-      </div>
-    )
-  };
-
-  const renderStepFourDecision = () => {
-    const data = getActiveData().decision;
-    const speakText = `${data.question}. ` + data.options.map(o => o.text).join('. ');
-    return (
-      <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center' }}>
-        <PageAudioButton text={speakText} />
-        <Smartphone size={80} color="#3B82F6" style={{ margin: '2rem auto 1.5rem' }} />
-        <h3 style={{ fontSize: headingSize, marginBottom: '2rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
-          {data.question}
-        </h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: '600px', margin: '0 auto' }}>
-          {data.options.map((opt, i) => (
-            <button
-              key={i}
-              className={`btn ${opt.isDanger ? 'btn-warning' : 'btn-outline'}`}
-              style={{ fontSize: currentFontSize, padding: '1.5rem', textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: opt.isSafe ? '3px solid #10B981' : undefined }}
-              onClick={() => {
-                handleNextStep(opt.nextStep);
-              }}
-            >
-              <span>{opt.isDanger ? "❌" : "✅"} {opt.text}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  const renderStepFiveSandbox = () => {
-    const data = getActiveData();
-    const speakText = `${data.sandboxMsg}. ${data.fakeLink}. ${data.sandboxDetail}. ${data.btnText}`;
-    return (
-      <div className="animate-fade-in" style={{ background: '#ffffff', color: '#000000', padding: '2rem', borderRadius: '12px', maxWidth: '500px', margin: '0 auto', borderTop: '8px solid #EF4444', position: 'relative' }}>
-        <PageAudioButton text={speakText} />
-        <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <h4 style={{ marginTop: '1rem', color: '#1a1a1a', fontWeight: 'bold', fontSize: '2rem' }}>
-            {data.sandboxMsg}
-          </h4>
-          <p style={{ color: '#EF4444', fontSize: '1.1rem', wordBreak: 'break-all' }}>{data.fakeLink}</p>
-        </div>
-
-        <div style={{ marginBottom: '2rem' }}>
-          <label style={{ display: 'block', marginBottom: '0.8rem', fontWeight: 'bold', fontSize: '1.3rem' }}>{data.sandboxDetail}</label>
-          <input
-            type={activeScenario === 'upi' ? "password" : "text"}
-            value={inputVal}
-            onChange={(e) => setInputVal(e.target.value)}
-            placeholder="*** ***"
-            style={{ width: '100%', padding: '1.2rem', borderRadius: '8px', border: '3px solid #ccc', fontSize: '1.5rem' }}
-          />
-        </div>
-        <button
-          className="btn btn-primary"
-          style={{ width: '100%', background: '#EF4444', padding: '1.5rem', fontSize: '1.5rem', fontWeight: 'bold' }}
-          onClick={() => handleNextStep(6)}
+        <button 
+          className="btn btn-primary" 
+          style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', borderRadius: '3rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.9s', transition: 'all 0.3s ease' }} 
+          onClick={() => setStep('hub')}
+          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
+          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          {data.btnText}
+          {ui.startBtn} <ArrowRight size={24} style={{ marginLeft: '10px', animation: 'bounceX 2s infinite' }} />
         </button>
 
-        <p style={{ marginTop: '2rem', fontSize: '1.2rem', textAlign: 'center', color: '#EF4444', fontWeight: 'bold' }}>⚠️ SIMULATION MODE</p>
+        {/* Dynamic Keyframes for smooth UI entrance */}
+        <style dangerouslySetInnerHTML={{__html: `
+          @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
+          @keyframes bounceX { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
+          @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+          @keyframes slideInRight { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
+          @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+        `}} />
       </div>
     );
   };
 
-  const renderStepSixConsequence = () => {
-    const speakText = `${t('consequenceTitle')}. ${t('consequenceText')}. ${t('debitAlert')}. ${t('recoverySteps')}. ${t('recovery1')}. ${t('recovery2')}. ${t('recovery3')}`;
+  const renderHub = () => {
     return (
-      <div className="glass-panel animate-fade-in" style={{ border: `5px solid #EF4444`, padding: '3rem' }}>
-        <PageAudioButton text={speakText} />
-
-        <div style={{ textAlign: 'center', marginBottom: '3rem', marginTop: '2rem' }}>
-          <AlertTriangle size={100} color="#EF4444" style={{ margin: '0 auto 1.5rem', animation: 'bounce 1s infinite' }} />
-          <h2 style={{ fontSize: headingSize, color: '#EF4444', marginBottom: '1rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            {t('consequenceTitle')}
-          </h2>
-          <p style={{ fontSize: currentFontSize, color: 'rgba(234, 234, 234, 0.9)', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-            {t('consequenceText')}
-          </p>
-        </div>
-
-        {/* The Shocking SMS Alert */}
-        <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '2rem', borderRadius: '16px', borderLeft: '10px solid #EF4444', marginBottom: '3rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <p style={{ fontSize: headingSize, fontWeight: 'bold', color: '#FFA0A0', lineHeight: '1.6' }}>
-            {t('debitAlert')}
-          </p>
-        </div>
-
-        {/* Recovery Solutions Section */}
-        <div style={{ background: '#2C2C2C', padding: '3rem', borderRadius: '16px', border: '2px solid #3A3A3A' }}>
-          <h4 style={{ color: '#10B981', fontSize: headingSize, marginBottom: '2rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <ShieldAlert size={36} /> {t('recoverySteps')}
-          </h4>
-          <ul style={{ paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-            <li style={{ fontSize: currentFontSize, display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-              <PhoneCall size={32} color="#3B82F6" style={{ marginTop: '4px' }} />
-              <span>{t('recovery1')}</span>
-            </li>
-            <li style={{ fontSize: currentFontSize, display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-              <CreditCard size={32} color="#FF9F1C" style={{ marginTop: '4px' }} />
-              <span>{t('recovery2')}</span>
-            </li>
-            <li style={{ fontSize: currentFontSize, display: 'flex', alignItems: 'flex-start', gap: '15px' }}>
-              <Globe size={32} color="#10B981" style={{ marginTop: '4px' }} />
-              <span>{t('recovery3')}</span>
-            </li>
-          </ul>
-        </div>
-
-        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', marginTop: '3.5rem' }}>
-          <button className="btn btn-outline" style={{ padding: '1.5rem', fontSize: currentFontSize }} onClick={() => { setStep(2); setInputVal(''); }}>
-            {t('tryAnother')}
-          </button>
-          <button className="btn btn-primary" style={{ padding: '1.5rem', fontSize: currentFontSize }} onClick={() => navigate('/banking')}>
-            {t('backToDash')}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-  const renderStepSevenLinkDetection = () => {
-    const data = getActiveData();
-    const speakText = `${t('whichLogicSafe')} ${t('option1')}: ${data.fakeLink}. ${t('option2')}: ${data.realLink}.`;
-    return (
-      <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center' }}>
-        <PageAudioButton text={speakText} />
-        <h3 style={{ fontSize: headingSize, marginBottom: '3rem', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {t('whichLogicSafe')}
+      <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center', maxWidth: '1000px', margin: '0 auto' }}>
+        <PageAudioButton text={ui.hubAudio} />
+        <h3 style={{ fontSize: '2rem', marginBottom: '3rem', color: '#E2E8F0' }}>
+          {ui.hubTitle}
         </h3>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <button
-            className="btn btn-outline"
-            style={{ padding: '2rem', fontSize: currentFontSize, textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            onClick={() => {
-              handleNextStep(6);
-            }}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
+          <div
+            onClick={() => handleCategorySelect('tax')}
+            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#10B981'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
           >
-            <span style={{ color: '#EF4444' }}>{data.fakeLink}</span>
-            <ExternalLink size={24} />
-          </button>
+            <Landmark size={60} color="#10B981" />
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubTax}</h4>
+          </div>
 
-          <button
-            className="btn btn-outline"
-            style={{ padding: '2rem', fontSize: currentFontSize, textAlign: 'left', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            onClick={() => {
-              handleNextStep(8);
-            }}
+          <div
+            onClick={() => handleCategorySelect('kyc')}
+            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#EF4444'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
           >
-            <span style={{ color: '#10B981' }}>{data.realLink}</span>
-            <ExternalLink size={24} />
-          </button>
+             <ShieldAlert size={60} color="#EF4444" />
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubKYC}</h4>
+          </div>
+
+          <div
+            onClick={() => handleCategorySelect('upi')}
+            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
+            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#F59E0B'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
+            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
+             <Wallet size={60} color="#F59E0B" />
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubUPI}</h4>
+          </div>
         </div>
       </div>
     );
   };
 
-  const renderStepEightSafeResult = () => {
-    const speakText = `${t('riskSafe')}. ${t('youSurvived')}`;
-    return (
-      <div className="glass-panel animate-fade-in" style={{ border: `5px solid #10B981`, padding: '4rem', textAlign: 'center' }}>
-        <PageAudioButton text={speakText} />
-        <CheckCircle size={100} color="#10B981" style={{ margin: '0 auto 2rem' }} />
-        <h2 style={{ fontSize: headingSize, color: '#10B981', marginBottom: '2rem', fontWeight: 'bold', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {t('riskSafe')}
-        </h2>
+  const renderQuiz = () => {
+    const scenario = activeScenarios[currentScenarioIdx];
+    const quizAudioText = subStep === 'sms' 
+      ? `Scenario ${currentScenarioIdx + 1}. Sender: ${scenario.sender}. Message: ${scenario.content}. ${ui.actionQuestion}.` 
+      : `${scenario.sandbox.title}. ${scenario.sandbox.inputLabel}`;
 
-        <p style={{ fontSize: currentFontSize, marginBottom: '3rem', lineHeight: '1.8', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-          {t('youSurvived')}
+    return (
+      <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', height: '100%', alignItems: 'stretch' }}>
+        
+        {/* LEFT PANEL: Interactive Center (70%) */}
+        <div style={{ flex: '7', background: '#1E293B', borderRadius: '1rem', border: '1px solid #334155', display: 'flex', flexDirection: 'column' }}>
+          
+          {/* Header */}
+          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}>
+            <span style={{ color: '#94A3B8', fontWeight: 'bold', textTransform: 'uppercase' }}>{activeCategory} : {currentScenarioIdx + 1} / {activeScenarios.length}</span>
+            <PageAudioButton text={quizAudioText} />
+          </div>
+
+          {/* Interactive Simulation Area */}
+          <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', overflowY: 'auto', position: 'relative' }}>
+            
+            {/* PHONE MOCKUP CONTAINER */}
+            <div style={{ width: '100%', maxWidth: '360px', flex: 1, minHeight: '500px', maxHeight: '720px', background: '#000000', borderRadius: '40px', border: '12px solid #1E293B', position: 'relative', boxShadow: '0 25px 30px -5px rgba(0, 0, 0, 0.7)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
+              
+              {/* Phone Status Bar */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: subStep === 'sms' ? '#F3F4F6' : '#FFFFFF', color: '#000000', padding: '10px 20px', fontSize: '0.8rem', fontWeight: 'bold', zIndex: 10, flexShrink: 0 }}>
+                 <span>11:42 AM</span>
+                 <div style={{ width: '80px', height: '20px', background: '#000000', borderRadius: '15px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '10px' }}></div>
+                 <span>5G 🔋</span>
+              </div>
+
+              {subStep === 'sms' ? (
+                // PHASE 1: FAKE SMS APP
+                <div className="animate-fade-in" style={{ flex: 1, background: '#F3F4F6', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                  
+                  {/* SMS Header */}
+                  <div style={{ background: '#F3F4F6', padding: '15px', textAlign: 'center', borderBottom: '1px solid #D1D5DB', flexShrink: 0 }}>
+                    <div style={{ width: '40px', height: '40px', background: '#9CA3AF', borderRadius: '50%', margin: '0 auto 8px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF' }}>
+                      <MessageCircle size={20} />
+                    </div>
+                    <span style={{ fontSize: '0.9rem', color: '#111827', fontWeight: 'bold' }}>{scenario.sender}</span>
+                  </div>
+
+                  {/* SMS Body */}
+                  <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                    <div style={{ textAlign: 'center', color: '#6B7280', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>
+                      {ui.actionQuestion || "New Message Received"}
+                    </div>
+                    <div style={{ background: '#E5E7EB', padding: '15px', borderRadius: '18px 18px 18px 4px', fontSize: '1rem', lineHeight: '1.5', color: '#111827', maxWidth: '85%', marginBottom: '20px', position: 'relative' }}>
+                      {scenario.content}
+                    </div>
+                  </div>
+
+                  {/* Neutral OS Action Bar */}
+                  <div style={{ background: '#FFFFFF', borderTop: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', flexShrink: 0, paddingBottom: '20px' }}>
+                    <button 
+                      style={{ padding: '16px', background: 'transparent', border: 'none', borderBottom: '1px solid #F3F4F6', color: '#3B82F6', fontSize: '1.1rem', fontWeight: 'bold', cursor: showResult ? 'not-allowed' : 'pointer', opacity: showResult ? 0.5 : 1, transition: 'background 0.2s' }}
+                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.background = '#F9FAFB' }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+                      onClick={handleDecisionOpenLink}
+                      disabled={showResult}
+                    >
+                      {ui.btnOpen}
+                    </button>
+                    <button 
+                      style={{ padding: '16px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '1.1rem', fontWeight: 'bold', cursor: showResult ? 'not-allowed' : 'pointer', opacity: showResult ? 0.5 : 1, transition: 'background 0.2s' }}
+                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.background = '#FEF2F2' }}
+                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
+                      onClick={handleDecisionSecure}
+                      disabled={showResult}
+                    >
+                      {ui.btnIgnore}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                // PHASE 2: FAKE BROWSER SANDBOX
+                <div className="animate-fade-in" style={{ flex: 1, background: '#FFFFFF', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+                  
+                  {/* Fake Browser Toolbar */}
+                  <div style={{ background: '#F8FAFC', padding: '15px 15px 10px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
+                     <div style={{ background: '#E2E8F0', flex: 1, padding: '8px 12px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                        <Lock size={14} color="#64748B" /> 
+                        <span style={{ fontSize: '0.9rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scenario.sandbox.fakeUrl}</span>
+                     </div>
+                  </div>
+
+                  {/* Fake Website Content */}
+                  <div style={{ padding: '30px 20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
+                    <h4 style={{ color: '#0F172A', fontWeight: 'bold', fontSize: '1.5rem', marginBottom: '2rem', textAlign: 'center' }}>
+                      {scenario.sandbox.title}
+                    </h4>
+            
+                    <div style={{ width: '100%', marginBottom: '20px', flexShrink: 0 }}>
+                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>
+                        {scenario.sandbox.inputLabel}
+                      </label>
+                      <input
+                        type={scenario.category === 'upi' ? "password" : "text"}
+                        value={inputVal}
+                        onChange={(e) => setInputVal(e.target.value)}
+                        placeholder="..."
+                        disabled={showResult}
+                        style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '1.2rem', background: showResult ? '#F8FAFC' : '#FFFFFF', outline: 'none' }}
+                      />
+                    </div>
+                    
+                    <button
+                      style={{ width: '100%', background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer', flexShrink: 0 }}
+                      onClick={handleSandboxSubmit}
+                      disabled={showResult || inputVal.trim() === ''}
+                    >
+                      {scenario.sandbox.btnText}
+                    </button>
+            
+                    <p style={{ marginTop: 'auto', fontSize: '0.85rem', color: '#94A3B8', fontWeight: 'bold', padding: '20px 0' }}>{ui.sandboxWarning}</p>
+                  </div>
+                </div>
+              )}
+
+            </div>
+          </div>
+        </div>
+
+        {/* RIGHT PANEL: Side Pop-out Support Panel (30%) */}
+        <div style={{ flex: '3', background: '#0F172A', borderRadius: '1rem', border: '1px solid #334155', padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+          {!showResult ? (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748B', textAlign: 'center', opacity: 0.7 }}>
+              <Info size={60} style={{ marginBottom: '1.5rem' }} />
+              <p style={{ fontSize: '1.2rem' }}>{ui.sidePanelWait}</p>
+            </div>
+          ) : (
+            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
+              
+              {/* Outcome Header */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #334155' }}>
+                {isCorrect ? <ShieldCheck color="#10B981" size={48} style={{ flexShrink: 0 }} /> : <ShieldX color="#EF4444" size={48} style={{ flexShrink: 0, animation: 'bounce 1s infinite' }} />}
+                <h3 style={{ color: isCorrect ? '#10B981' : '#EF4444', fontSize: '1.6rem', margin: 0 }}>
+                  {isCorrect ? ui.correctTitle : ui.wrongTitle}
+                </h3>
+              </div>
+
+              {/* Detailed Explanation */}
+              <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                
+                {/* Show what happens if you fall for it (Only if Wrong) */}
+                {!isCorrect && scenario.consequenceWrong && (
+                  <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #EF4444' }}>
+                    <p style={{ color: '#FCA5A5', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                      {ui.whyWrong}
+                    </p>
+                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
+                      {scenario.consequenceWrong}
+                    </p>
+                  </div>
+                )}
+
+                {/* Show how to stay safe / identify truth (Only if Correct) */}
+                {isCorrect && scenario.explanationRight && (
+                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981' }}>
+                    <p style={{ color: '#6EE7B7', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                      {ui.whyCorrect}
+                    </p>
+                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
+                      {scenario.explanationRight}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Red Flags Block */}
+              {scenario.redFlags && scenario.redFlags.length > 0 && (
+                <div style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #EF4444', padding: '1rem 1.5rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#FCA5A5', fontWeight: 'bold', marginBottom: '0.8rem' }}>
+                    <AlertTriangle size={18} /> {ui.redFlags}
+                  </span>
+                  <ul style={{ color: '#FECACA', fontSize: '0.95rem', paddingLeft: '1.5rem', margin: 0, lineHeight: '1.5' }}>
+                    {scenario.redFlags.map((flag, idx) => <li key={idx} style={{ marginBottom: '0.4rem' }}>{flag}</li>)}
+                  </ul>
+                </div>
+              )}
+
+              {/* Next Button */}
+              <button 
+                className="btn btn-primary" 
+                style={{ marginTop: 'auto', padding: '1.2rem', width: '100%', fontSize: '1.1rem', borderRadius: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} 
+                onClick={nextScenario}
+              >
+                {ui.nextScenario} <ArrowRight size={20} />
+              </button>
+
+            </div>
+          )}
+        </div>
+
+      </div>
+    );
+  };
+
+  const renderFinal = () => {
+    let userName = 'User';
+    try {
+      const storedUser = JSON.parse(localStorage.getItem('user'));
+      if (storedUser && storedUser.name) userName = storedUser.name;
+    } catch { /* ignore */ }
+
+    const isPerfect = score === activeScenarios.length;
+    let message = isPerfect ? ui.perfectScore : ui.imperfectScore;
+    message = message.replace('{name}', userName);
+
+    return (
+      <div className="glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '0 auto' }}>
+        <PageAudioButton text={`${ui.scoreText}. ${message}. Your score is ${score} out of ${activeScenarios.length}.`} />
+        
+        {isPerfect ? (
+          <ShieldCheck size={100} color="#10B981" style={{ marginBottom: '2rem', display: 'inline-block' }} />
+        ) : (
+          <ShieldX size={100} color="#F59E0B" style={{ marginBottom: '2rem', display: 'inline-block' }} />
+        )}
+        
+        <h2 className="title-lg" style={{ marginBottom: '1rem' }}>{ui.scoreText}</h2>
+        <p style={{ fontSize: '1.4rem', color: '#94A3B8', marginBottom: '1rem' }}>
+          Score: <strong style={{ color: isPerfect ? '#10B981' : '#F59E0B' }}>{score}</strong> out of <strong style={{ color: '#F8FAFC' }}>{activeScenarios.length}</strong>
         </p>
 
-        <div style={{ display: 'flex', gap: '1.5rem', justifyContent: 'center' }}>
-          <button className="btn btn-outline" style={{ padding: '1.5rem', fontSize: currentFontSize }} onClick={() => { setStep(2); setInputVal(''); }}>
-            {t('tryAnother')}
-          </button>
-          <button className="btn btn-primary" style={{ padding: '1.5rem', fontSize: currentFontSize }} onClick={() => navigate('/banking')}>
-            {t('backToDash')}
+        <div style={{ background: isPerfect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2.5rem' }}>
+           <p style={{ fontSize: '1.2rem', color: isPerfect ? '#6EE7B7' : '#FCD34D', margin: 0 }}>
+             {message}
+           </p>
+        </div>
+
+        <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexDirection: 'column' }}>
+          {!isPerfect && (
+             <button className="btn btn-primary" style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => { setCurrentScenarioIdx(0); setScore(0); setSubStep('sms'); setShowResult(false); setStep('quiz') }}>
+              {ui.tryAgainBtn}
+            </button>
+          )}
+          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => navigate('/dashboard')}>
+            {ui.returnBtn}
           </button>
         </div>
       </div>
@@ -593,23 +541,26 @@ const OtpSimulator = () => {
   };
 
   return (
-    <div className="module-page" style={{ minHeight: '100vh', background: 'var(--bg-primary)', padding: '2rem' }}>
-      <header style={{ marginBottom: '3rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button className="btn-link" onClick={() => { window.speechSynthesis?.cancel(); navigate('/banking'); }} style={{ background: 'none', border: 'none', color: 'white', cursor: 'pointer' }}>
-          <ArrowLeft size={24} />
+    <div className="module-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary, #020617)', padding: '2rem' }}>
+      {/* Header */}
+      <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
+        <button 
+          className="btn-link" 
+          onClick={() => {
+            if(step === 'quiz') setStep('hub');
+            else if(step === 'hub') setStep('intro');
+            else navigate('/banking');
+          }} 
+          style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          <ArrowLeft size={24} /> Back
         </button>
-        <h2 className="title-lg" style={{ margin: 0 }}>{t('moduleOTP')}</h2>
+        <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.title}</h2>
       </header>
 
-      <div className="container" style={{ maxWidth: '900px' }}>
-        {step === 1 && renderStepOne()}
-        {step === 2 && renderStepTwoHub()}
-        {step === 3 && renderStepThreeBreakdown()}
-        {step === 4 && renderStepFourDecision()}
-        {step === 5 && renderStepFiveSandbox()}
-        {step === 6 && renderStepSixConsequence()}
-        {step === 7 && renderStepSevenLinkDetection()}
-        {step === 8 && renderStepEightSafeResult()}
+      {/* Dynamic Content Area */}
+      <div style={{ flex: 1, minHeight: 0 }}>
+        {step === 'intro' ? renderIntro() : step === 'hub' ? renderHub() : step === 'quiz' ? renderQuiz() : renderFinal()}
       </div>
     </div>
   );
