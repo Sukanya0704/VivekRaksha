@@ -221,22 +221,20 @@ const FraudSimulatorNew = () => {
               <h4 style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#E2E8F0', fontSize: '1.2rem' }}>What action will you take?</h4>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button 
-                  className="btn" 
-                  style={{ background: '#334155', color: 'white', padding: '1.2rem', borderRadius: '12px', fontSize: '1.1rem', textAlign: 'center', border: '1px solid #475569', transition: 'all 0.2s', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer' }} 
-                  onClick={() => handleDecision(scenario.actionPositive.isCorrect)} 
-                  disabled={showResult}
-                >
-                  {scenario.actionPositive.text}
-                </button>
-                <button 
-                  className="btn" 
-                  style={{ background: '#334155', color: 'white', padding: '1.2rem', borderRadius: '12px', fontSize: '1.1rem', textAlign: 'center', border: '1px solid #475569', transition: 'all 0.2s', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer' }}  
-                  onClick={() => handleDecision(scenario.actionNegative.isCorrect)} 
-                  disabled={showResult}
-                >
-                  {scenario.actionNegative.text}
-                </button>
+                {[scenario.actionPositive, scenario.actionNegative]
+                  .map((action, idx) => ({ action, idx }))
+                  .sort((a, b) => (currentScenario % 2 === 1 ? b.idx - a.idx : a.idx - b.idx))
+                  .map(({ action }) => (
+                    <button 
+                      key={action.text}
+                      className="btn" 
+                      style={{ background: '#334155', color: 'white', padding: '1.2rem', borderRadius: '12px', fontSize: '1.1rem', textAlign: 'center', border: '1px solid #475569', transition: 'all 0.2s', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer' }} 
+                      onClick={() => handleDecision(action.isCorrect)} 
+                      disabled={showResult}
+                    >
+                      {action.text}
+                    </button>
+                  ))}
               </div>
             </div>
 
