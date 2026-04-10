@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { Shield, Lock as LockIcon, CreditCard, ArrowLeft, Eye, EyeOff, Info, LogOut, Minus, Square, X as CloseIcon, ChevronDown, CheckCircle, User, FileText, Smartphone } from 'lucide-react';
+import { markLevelComplete } from '../../utils/levelProgress';
 
 const TRANSLATIONS = {
   en: {
@@ -334,10 +335,10 @@ const NetBankingSimulator = ({ language: languageProp }) => {
                   <div style={{ display: 'flex', alignItems: 'center', background: 'white', borderRadius: '16px', padding: '6px 16px', flex: 1, border: '1px solid #ddd' }}>
                      <LockIcon size={14} color="#15803d" style={{ marginRight: '8px' }} />
                      <span style={{ fontSize: '14px', color: '#1a1a1a' }}>https://retail.onlinesbi.sbi/retail/login.htm</span>
-                  </div>
                </div>
+            </div>
            </div>
-
+            
            <div style={{ border: '1px solid #ccc', borderTop: 'none', backgroundColor: '#f8fafc', minHeight: '650px', display: 'flex', flexDirection: 'column', position: 'relative', overflow: 'hidden' }}>
                
                <div style={{ backgroundColor: '#00356b', color: 'white', padding: '16px 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -605,9 +606,14 @@ const NetBankingSimulator = ({ language: languageProp }) => {
                      <div style={{ background: 'white', padding: '48px', borderRadius: '16px', width: '500px', textAlign: 'center', animation: 'scaleIn 0.5s', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}>
                         <CheckCircle size={72} color="#10b981" style={{ margin: '0 auto 24px' }} />
                         <h2 style={{ marginTop: 0, color: '#065f46', fontSize: '32px' }}>Tutorial Complete!</h2>
-                        <button onClick={restartTutorial} className="demo-btn critical-ui" style={{ padding: '16px 40px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '18px', boxShadow: '0 4px 6px -1px rgba(16, 185, 129, 0.4)' }}>
-                           Restart Sandbox
-                        </button>
+                        <div style={{ display: "flex", gap: 12, justifyContent: "center", marginTop: 8 }}>
+                           <button onClick={restartTutorial} className="demo-btn critical-ui" style={{ padding: '14px 24px', background: '#10b981', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}>
+                              Restart Sandbox
+                           </button>
+                           <button onClick={() => markLevelComplete(5, navigate)} className="demo-btn critical-ui" style={{ padding: '14px 24px', background: '#00356b', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold', fontSize: '15px' }}>
+                              Return to Safety Road &rarr;
+                           </button>
+                        </div>
                      </div>
                   </div>
                )}
@@ -639,7 +645,7 @@ const NetBankingSimulator = ({ language: languageProp }) => {
                   {activeKnowledge}
               </div>
           </div>
-      </div>
+       </div>
     </div>
   );
 };

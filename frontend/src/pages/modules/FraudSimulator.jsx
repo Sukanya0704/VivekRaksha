@@ -5,6 +5,7 @@ import { ArrowLeft, ShieldCheck, ShieldX, PhoneIncoming, MessageSquareWarning, A
 import PageAudioButton from '../../components/PageAudioButton';
 import { playAudio } from '../../utils/audio';
 import { scenariosData } from '../../data/fraudScenarios';
+import { markLevelComplete } from '../../utils/levelProgress';
 
 const FraudSimulatorNew = () => {
   const { language } = useLanguage();
@@ -372,7 +373,7 @@ const FraudSimulatorNew = () => {
               {ui.tryAgainBtn}
             </button>
           )}
-          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => navigate('/dashboard')}>
+          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => markLevelComplete(3, navigate)}>
             {ui.returnBtn}
           </button>
         </div>

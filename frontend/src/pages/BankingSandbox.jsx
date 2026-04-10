@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { CreditCard, Smartphone, PhoneOff, Lock, ArrowLeft } from 'lucide-react';
+import { CreditCard, Smartphone, PhoneOff, Lock, ArrowLeft, Map, Trophy } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 const BankingSandbox = () => {
@@ -59,6 +59,44 @@ const BankingSandbox = () => {
         <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
           <h2 className="title-lg">{t('selectModule')}</h2>
           <p style={{ color: 'var(--text-primary)', opacity: 0.85 }}>{t('chooseSimulation')}</p>
+        </div>
+
+        {/* Level Map CTA */}
+        <div
+          onClick={() => navigate('/banking')}
+          style={{
+            background: 'linear-gradient(135deg, rgba(255,159,28,0.18), rgba(214,69,69,0.12))',
+            border: '2px solid rgba(255,159,28,0.45)',
+            borderRadius: 22,
+            padding: '2rem 2.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '2rem',
+            cursor: 'pointer',
+            marginBottom: '2.5rem',
+            transition: 'transform 0.3s, box-shadow 0.3s',
+            boxShadow: '0 8px 40px rgba(0,0,0,0.3)',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 16px 50px rgba(255,159,28,0.25)'; }}
+          onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 40px rgba(0,0,0,0.3)'; }}
+        >
+          <div style={{
+            width: 72, height: 72, borderRadius: 20,
+            background: 'linear-gradient(135deg, #FF9F1C, #D64545)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0, boxShadow: '0 0 24px rgba(255,159,28,0.4)',
+          }}>
+            <Map size={36} color="#1E1E1E" />
+          </div>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontSize: '0.75rem', color: '#FF9F1C', fontWeight: 700, letterSpacing: 1.2, marginBottom: 4 }}>🏅 GAMIFIED LEARNING PATH</p>
+            <h3 style={{ margin: 0, fontSize: '1.5rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)', marginBottom: 4 }}>Safety Road – Level Map</h3>
+            <p style={{ margin: 0, fontSize: '0.95rem', color: 'var(--text-primary)', opacity: 0.75 }}>Follow the winding path, earn badges, and master banking security step by step.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#FF9F1C', flexShrink: 0 }}>
+            <Trophy size={22} />
+            <span style={{ fontSize: '1rem', fontWeight: 700 }}>Start</span>
+          </div>
         </div>
 
         <div className="grid-cols-2" style={{ gap: '2rem' }}>

@@ -13,6 +13,9 @@ import NetBankingSimulator from './pages/modules/NetBankingSimulator';
 import FraudSimulator from './pages/modules/FraudSimulator';
 import OtpSimulator from './pages/modules/OtpSimulator';
 import IdentitySafety from './pages/IdentitySafety';
+import LevelMap from './pages/LevelMap';
+import UpiPinPlaceholder from './pages/modules/UpiPinPlaceholder';
+import EkycPlaceholder from './pages/modules/EkycPlaceholder';
 
 function App() {
   return (
@@ -23,11 +26,13 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/banking" element={<BankingSandbox />} />
+          <Route path="/banking" element={<LevelMap />} />
           <Route path="/banking/upi" element={<UpiSimulator />} />
+          <Route path="/banking/upi-pin" element={<UpiPinPlaceholder />} />
           <Route path="/banking/netbanking" element={<NetBankingSimulator />} />
           <Route path="/banking/fraud" element={<FraudSimulator />} />
           <Route path="/banking/otp" element={<OtpSimulator />} />
+          <Route path="/banking/ekyc" element={<EkycPlaceholder />} />
           <Route path="/identity" element={<IdentitySafety />} />
         </Routes>
       </Router>
