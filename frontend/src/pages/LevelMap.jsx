@@ -113,8 +113,8 @@ const Pipe = ({ fromSide, isLit, litColor }) => {
       <svg viewBox="0 0 600 80" preserveAspectRatio="none" style={{ width: "100%", height: "100%", display: "block" }}>
         <defs>
           <linearGradient id={`pipeGrad-${fromSide}-${isLit}`} x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" stopColor={isLit ? litColor : "rgba(255,255,255,0.08)"} />
-            <stop offset="100%" stopColor={isLit ? litColor : "rgba(255,255,255,0.06)"} />
+            <stop offset="0%" stopColor={isLit ? litColor : "#555555"} />
+            <stop offset="100%" stopColor={isLit ? litColor : "#444444"} />
           </linearGradient>
           <filter id="pipeGlow">
             <feGaussianBlur stdDeviation="3" result="blur" />
@@ -133,11 +133,11 @@ const Pipe = ({ fromSide, isLit, litColor }) => {
           d={dirLeft ? "M 120 0 L 120 40 L 480 40 L 480 80" : "M 480 0 L 480 40 L 120 40 L 120 80"}
           fill="none"
           stroke={`url(#pipeGrad-${fromSide}-${isLit})`}
-          strokeWidth={isLit ? 16 : 10}
+          strokeWidth={isLit ? 16 : 12}
           strokeLinecap="round"
           strokeLinejoin="round"
           filter={isLit ? "url(#pipeGlow)" : ""}
-          opacity={isLit ? 1 : 0.4}
+          opacity={isLit ? 1 : 0.8}
         />
         <path
           d={dirLeft ? "M 120 0 L 120 40 L 480 40 L 480 80" : "M 480 0 L 480 40 L 120 40 L 120 80"}
@@ -160,12 +160,13 @@ const LevelCard = ({ level, state, onSelect, t }) => {
   const Icon = level.icon;
   const isCompleted = state === "completed";
   const isActive = state === "active";
+  const isAvailable = state === "unlocked";
   const isLocked = state === "locked";
 
-  const displayColor = isCompleted ? "#4CAF50" : isActive ? "#FF9F1C" : "rgba(255,255,255,0.1)";
-  const displayAccent = isCompleted ? "rgba(76,175,80,0.15)" : isActive ? "rgba(255,159,28,0.15)" : "transparent";
-  const displayGlow = isCompleted ? "rgba(76,175,80,0.35)" : isActive ? "rgba(255,159,28,0.35)" : "transparent";
-  const borderColor = isCompleted ? "#4CAF50" : isActive ? "#FF9F1C" : "rgba(255,255,255,0.1)";
+  const displayColor = isCompleted ? "#4CAF50" : (isActive || isAvailable) ? level.color : "rgba(255,255,255,0.1)";
+  const displayAccent = isCompleted ? "rgba(76,175,80,0.15)" : (isActive || isAvailable) ? level.accent : "transparent";
+  const displayGlow = isCompleted ? "rgba(76,175,80,0.35)" : (isActive || isAvailable) ? level.glow : "transparent";
+  const borderColor = isCompleted ? "#4CAF50" : (isActive || isAvailable) ? level.color : "rgba(255,255,255,0.1)";
 
   return (
     <motion.div
@@ -192,7 +193,7 @@ const LevelCard = ({ level, state, onSelect, t }) => {
         />
       )}
       <div style={{
-        position: "relative", zIndex: 1, background: "rgba(40,40,40,0.7)", backdropFilter: "blur(14px)", border: `2px solid ${borderColor}`,
+        position: "relative", zIndex: 1, background: "rgba(10,10,10,0.85)", backdropFilter: "blur(14px)", border: `2px solid ${borderColor}`,
         borderRadius: 20, padding: "1.4rem 1.5rem", boxShadow: isActive ? `0 0 28px ${displayGlow}, 0 8px 32px rgba(0,0,0,0.5)` : isCompleted ? "0 0 18px rgba(76,175,80,0.25), 0 8px 24px rgba(0,0,0,0.4)" : "0 6px 24px rgba(0,0,0,0.35)",
         transition: "box-shadow 0.3s",
       }}>
@@ -209,7 +210,10 @@ const LevelCard = ({ level, state, onSelect, t }) => {
             </span>
           )}
           {isActive && (
-            <motion.span animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ display: "flex", alignItems: "center", gap: 5, background: displayAccent, border: `1px solid ${displayColor}66`, borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: displayColor, letterSpacing: 0.6 }}>▶ {t('levelStatusCurrent')}</motion.span>
+            <motion.span animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ display: "flex", alignItems: "center", gap: 5, background: displayAccent, border: `1px solid ${displayColor}66`, borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: displayColor, letterSpacing: 0.6 }}>▶ {t('levelStatusCurrent') || 'CURRENT'}</motion.span>
+          )}
+          {isAvailable && (
+            <span style={{ display: "flex", alignItems: "center", gap: 5, background: displayAccent, border: `1px solid ${displayColor}66`, borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: displayColor, letterSpacing: 0.6 }}>Not Completed</span>
           )}
           {isLocked && (
             <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: 0.6 }}>🔒 {t('levelStatusLocked')}</span>
@@ -217,14 +221,11 @@ const LevelCard = ({ level, state, onSelect, t }) => {
         </div>
         <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "1.1rem", fontWeight: 700, color: isLocked ? "rgba(255,255,255,0.3)" : "#EAEAEA", margin: "0 0 0.4rem 0", lineHeight: 1.25 }}>{t(level.titleKey)}</h3>
         {!isLocked && <p style={{ fontSize: "0.88rem", color: "rgba(234,234,234,0.65)", margin: 0, lineHeight: 1.55 }}>{t(level.descKey)}</p>}
-        {isActive && (
-          <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.7rem" }}>
-            <span style={{ fontSize: "1.3rem" }}>👮</span>
-            <button style={{ flex: 1, background: displayColor, color: "#1E1E1E", border: "none", borderRadius: 12, padding: "11px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", fontFamily: "var(--font-heading)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "filter 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.12)")} onMouseLeave={(e) => (e.currentTarget.style.filter = "none")}>
-              {t('levelBtnStart')} <ChevronRight size={18} />
-            </button>
-          </div>
-        )}
+        <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.7rem" }}>
+          <button style={{ flex: 1, background: displayColor, color: "#1E1E1E", border: "none", borderRadius: 12, padding: "11px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", fontFamily: "var(--font-heading)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "filter 0.2s" }} onClick={(e) => { e.stopPropagation(); onSelect(level); }} onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.12)")} onMouseLeave={(e) => (e.currentTarget.style.filter = "none")}>
+            {(t('levelBtnStart') && t('levelBtnStart') !== 'levelBtnStart') ? t('levelBtnStart') : (isCompleted ? 'Review Simulation' : 'Start Training')} <ChevronRight size={18} />
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -283,9 +284,9 @@ const LevelMap = () => {
 
   const isCompleted = (id) => progress.completed.includes(id);
   const isActive = (id) => !isCompleted(id) && id === progress.highestUnlocked;
-  const isLocked = (id) => !isCompleted(id) && id > progress.highestUnlocked;
+  const isLocked = (id) => false; // Enforce unlocked for all modules
 
-  const getState = (id) => isCompleted(id) ? "completed" : isActive(id) ? "active" : "locked";
+  const getState = (id) => isCompleted(id) ? "completed" : isActive(id) ? "active" : "unlocked";
 
   const handleSelect = (level) => {
     if (isLocked(level.id)) return;

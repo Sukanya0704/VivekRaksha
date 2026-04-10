@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Landmark, Building2, AlertCircle, Info, LogOut, Navigation } from 'lucide-react';
@@ -18,6 +19,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem('user')) || { name: 'User' };
   
+  const [showDisclaimer, setShowDisclaimer] = useState(() => !sessionStorage.getItem('disclaimerAccepted'));
   const [animatingTo, setAnimatingTo] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
@@ -38,13 +40,45 @@ const Dashboard = () => {
       setTimeout(() => navigate('/identity'), 600);
   };
 
+  const handleAcceptDisclaimer = () => {
+    sessionStorage.setItem('disclaimerAccepted', 'true');
+    setShowDisclaimer(false);
+  };
+
   return (
-    <div className="dashboard-container" style={{ 
-      minHeight: '100vh', 
-      background: 'var(--bg-primary)',
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
+    <>
+      {showDisclaimer && createPortal(
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 99999, padding: '20px'
+        }}>
+          <div className="glass-panel animate-fade-in" style={{ maxWidth: '500px', width: '100%', padding: '3rem', textAlign: 'center' }}>
+              <div style={{ width: 80, height: 80, background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem', border: '2px solid rgba(239, 68, 68, 0.3)' }}>
+                 <AlertCircle size={40} color="#EF4444" />
+              </div>
+              <h2 style={{ marginBottom: '1.5rem', color: 'var(--text-primary)', fontSize: '1.8rem', fontFamily: 'var(--font-heading)' }}>{t('securityDisclaimer') || 'Simulation Disclaimer'}</h2>
+              <p style={{ color: 'var(--text-primary)', opacity: 0.85, fontSize: '1.1rem', lineHeight: 1.6, marginBottom: '2.5rem' }}>
+                  {t('townDisclaimer') || "This is a simulated training environment. Never enter your real passwords, OTPs, or financial details here."}
+              </p>
+              <button className="btn btn-warning" style={{ width: '100%', padding: '16px', fontSize: '1.1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }} onClick={handleAcceptDisclaimer}>
+                  Proceed to Training <Navigation size={20} />
+              </button>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      <div className="dashboard-container" style={{ 
+        filter: showDisclaimer ? 'blur(8px)' : 'none',
+        pointerEvents: showDisclaimer ? 'none' : 'auto',
+        userSelect: showDisclaimer ? 'none' : 'auto',
+        minHeight: '100vh', 
+        background: 'var(--bg-primary)',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
       <header className="glass-nav" style={{ padding: '1rem 2rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <div style={{ background: '#FF9F1C', borderRadius: '50%', width: '40px', height: '40px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1E1E1E', fontWeight: 'bold' }}>
@@ -56,9 +90,6 @@ const Dashboard = () => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <LanguageSelector />
           <ThemeToggle />
-          <button className="btn btn-outline" onClick={() => { localStorage.clear(); navigate('/'); }} style={{ padding: '8px 16px', fontSize: '0.9rem' }}>
-            <LogOut size={16} /> {t('login')}
-          </button>
         </div>
       </header>
 
@@ -140,40 +171,10 @@ const Dashboard = () => {
             </div>
         </div>
 
-        {/* Security Notice Board */}
-        <div className="glass-panel animate-fade-in-delay-2" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', background: 'var(--glass-bg)', position: 'relative', overflow: 'hidden', marginTop: '1rem' }}>
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: 'linear-gradient(to bottom, #D64545, #FF9F1C)' }}></div>
-            
-            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '2rem' }}>
-                <div>
-                   <h4 style={{ color: 'var(--color-muted-red)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
-                      <AlertCircle size={20} /> {t('securityDisclaimer')}
-                   </h4>
-                   <p style={{ color: 'var(--text-primary)', opacity: 0.85, fontSize: '0.95rem', lineHeight: 1.6 }}>
-                      {t('townDisclaimer')}
-                   </p>
-                </div>
-
-                <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: '2rem' }}>
-                   <h4 style={{ color: 'var(--color-warning-orange)', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '1.2rem' }}>
-                      <Navigation size={20} /> {t('safetyTips')}
-                   </h4>
-                   <ul style={{ fontSize: '0.95rem', color: 'var(--text-primary)', opacity: 0.85, paddingLeft: '1.2rem', display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
-                      <li>{t('tip1')}</li>
-                      <li>{t('tip2')}</li>
-                      <li>{t('tip3')}</li>
-                   </ul>
-                </div>
-            </div>
-        </div>
       </main>
 
-      <div style={{ position: 'fixed', bottom: '2rem', right: '2rem' }}>
-        <button className="glass-panel" style={{ borderRadius: '50%', width: '60px', height: '60px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FF9F1C', cursor: 'help' }}>
-          <Info size={32} />
-        </button>
       </div>
-    </div>
+    </>
   );
 };
 
