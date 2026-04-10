@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import { Shield, Lock as LockIcon, CreditCard, ArrowLeft, Eye, EyeOff, Info, LogOut, Minus, Square, X as CloseIcon, ChevronDown, CheckCircle, User, FileText, Smartphone } from 'lucide-react';
 import { markLevelComplete } from '../../utils/levelProgress';
+import LanguageSelector from '../../components/LanguageSelector';
 
 const TRANSLATIONS = {
   en: {
@@ -347,6 +348,7 @@ const NetBankingSimulator = ({ language: languageProp }) => {
                      <h2 style={{ margin: 0, fontSize: '1.4rem' }}>State Bank of India</h2>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '24px', fontSize: '14px' }}>
+                     <LanguageSelector />
                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><User size={18} /> Welcome, Demo User</div>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#93c5fd' }}><LogOut size={18} /> Logout</div>
                   </div>

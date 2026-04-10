@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
 import * as LucideIcons from 'lucide-react';
 import { markLevelComplete } from '../../utils/levelProgress';
+import LanguageSelector from '../../components/LanguageSelector';
 
 const { 
   ArrowLeft, CheckCircle, Smartphone, Building2, User, History, Search
@@ -291,7 +292,10 @@ const UpiSimulator = ({ language: languageProp }) => {
 
         {/* Universal Disclaimer */}
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, background: '#e2e8f0', color: '#0f172a', padding: '12px 24px', fontSize: '14px', fontWeight: 'bold', display: 'flex', gap: '8px', alignItems: 'center', justifyContent: 'center', zIndex: 100, borderBottom: '1px solid #cbd5e1' }}>
-            <span>⚠️</span> Disclaimer: All UPI payment apps look different. This is just a basic demonstration. Never enter your real PIN here.
+            <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
+                <span>⚠️</span> Disclaimer: All UPI payment apps look different. This is just a basic demonstration. Never enter your real PIN here.
+            </div>
+            <LanguageSelector />
         </div>
 
         {/* Outward Walkthrough Tooltip */}

@@ -13,6 +13,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import ThemeToggle from "../components/ThemeToggle";
+import LanguageSelector from "../components/LanguageSelector";
+import { useLanguage } from "../context/LanguageContext";
 
 /* ────────────────────────────────────────────────────────────
    DATA
@@ -21,74 +23,74 @@ const LEVELS = [
   {
     id: 1,
     side: "left",
-    title: "Secure Your UPI PIN",
+    titleKey: "level1Title",
     icon: Shield,
     color: "#FF9F1C",
     accent: "rgba(255,159,28,0.15)",
     glow: "rgba(255,159,28,0.35)",
     path: "/banking/upi-pin",
     badge: "PIN PROTECTOR",
-    description: "Set a strong UPI PIN and learn how to shield it from shoulder-surfers.",
+    descKey: "level1Desc",
   },
   {
     id: 2,
     side: "right",
-    title: "Safe UPI Payments",
+    titleKey: "level2Title",
     icon: Smartphone,
     color: "#10B981",
     accent: "rgba(16,185,129,0.15)",
     glow: "rgba(16,185,129,0.35)",
     path: "/banking/upi",
     badge: "PAYMENT GUARDIAN",
-    description: "Verify payees, inspect QR codes, and reject spoofed payment requests.",
+    descKey: "level2Desc",
   },
   {
     id: 3,
     side: "left",
-    title: "Fraud Call & SMS Lab",
+    titleKey: "level3Title",
     icon: PhoneOff,
     color: "#F59E0B",
     accent: "rgba(245,158,11,0.15)",
     glow: "rgba(245,158,11,0.35)",
     path: "/banking/fraud",
     badge: "SCAM BUSTER",
-    description: "Detect fake calls and suspicious SMS messages using real-world patterns.",
+    descKey: "level3Desc",
   },
   {
     id: 4,
     side: "right",
-    title: "OTP & Link Scam Check",
+    titleKey: "level4Title",
     icon: Lock,
     color: "#EF4444",
     accent: "rgba(239,68,68,0.15)",
     glow: "rgba(239,68,68,0.35)",
     path: "/banking/otp",
     badge: "OTP DEFENDER",
-    description: "Never share your OTP. Identify phishing links before they steal your money.",
+    descKey: "level4Desc",
   },
   {
     id: 5,
     side: "left",
-    title: "Net Banking Sandbox",
+    titleKey: "level5Title",
     icon: Vault,
     color: "#3B82F6",
     accent: "rgba(59,130,246,0.15)",
     glow: "rgba(59,130,246,0.35)",
     path: "/banking/netbanking",
     badge: "VAULT KEEPER",
-    description: "Practice safe login, session management, and secure logout inside a simulated portal.",
+    descKey: "level5Desc",
   },
   {
     id: 6,
     side: "right",
-    title: "eKYC Verification Mastery",
+    titleKey: "level6Title",
     icon: BadgeCheck,
     color: "#8B5CF6",
     accent: "rgba(139,92,246,0.15)",
     glow: "rgba(139,92,246,0.35)",
     path: "/banking/ekyc",
     badge: "KYC MASTER",
-    description: "Recognise valid eKYC documents and unmask fake verification agents.",
+    descKey: "level6Desc",
   },
 ];
 
@@ -154,7 +156,7 @@ const Pipe = ({ fromSide, isLit, litColor }) => {
 /* ────────────────────────────────────────────────────────────
    LEVEL CARD
 ──────────────────────────────────────────────────────────── */
-const LevelCard = ({ level, state, onSelect }) => {
+const LevelCard = ({ level, state, onSelect, t }) => {
   const Icon = level.icon;
   const isCompleted = state === "completed";
   const isActive = state === "active";
@@ -203,23 +205,23 @@ const LevelCard = ({ level, state, onSelect }) => {
           </div>
           {isCompleted && (
             <span style={{ display: "flex", alignItems: "center", gap: 5, background: "rgba(76,175,80,0.18)", border: "1px solid #4CAF5066", borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: "#4CAF50", letterSpacing: 0.6 }}>
-              <CheckCircle2 size={12} /> Completed
+              <CheckCircle2 size={12} /> {t('levelStatusCompleted')}
             </span>
           )}
           {isActive && (
-            <motion.span animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ display: "flex", alignItems: "center", gap: 5, background: displayAccent, border: `1px solid ${displayColor}66`, borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: displayColor, letterSpacing: 0.6 }}>▶ Current</motion.span>
+            <motion.span animate={{ opacity: [1, 0.6, 1] }} transition={{ duration: 1.5, repeat: Infinity }} style={{ display: "flex", alignItems: "center", gap: 5, background: displayAccent, border: `1px solid ${displayColor}66`, borderRadius: 99, padding: "4px 10px", fontSize: "0.72rem", fontWeight: 700, color: displayColor, letterSpacing: 0.6 }}>▶ {t('levelStatusCurrent')}</motion.span>
           )}
           {isLocked && (
-            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: 0.6 }}>🔒 Locked</span>
+            <span style={{ fontSize: "0.72rem", fontWeight: 600, color: "rgba(255,255,255,0.25)", letterSpacing: 0.6 }}>🔒 {t('levelStatusLocked')}</span>
           )}
         </div>
-        <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "1.1rem", fontWeight: 700, color: isLocked ? "rgba(255,255,255,0.3)" : "#EAEAEA", margin: "0 0 0.4rem 0", lineHeight: 1.25 }}>{level.title}</h3>
-        {!isLocked && <p style={{ fontSize: "0.88rem", color: "rgba(234,234,234,0.65)", margin: 0, lineHeight: 1.55 }}>{level.description}</p>}
+        <h3 style={{ fontFamily: "var(--font-heading)", fontSize: "1.1rem", fontWeight: 700, color: isLocked ? "rgba(255,255,255,0.3)" : "#EAEAEA", margin: "0 0 0.4rem 0", lineHeight: 1.25 }}>{t(level.titleKey)}</h3>
+        {!isLocked && <p style={{ fontSize: "0.88rem", color: "rgba(234,234,234,0.65)", margin: 0, lineHeight: 1.55 }}>{t(level.descKey)}</p>}
         {isActive && (
           <div style={{ marginTop: "1rem", display: "flex", alignItems: "center", gap: "0.7rem" }}>
             <span style={{ fontSize: "1.3rem" }}>👮</span>
             <button style={{ flex: 1, background: displayColor, color: "#1E1E1E", border: "none", borderRadius: 12, padding: "11px 16px", fontSize: "0.95rem", fontWeight: 800, cursor: "pointer", fontFamily: "var(--font-heading)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "filter 0.2s" }} onMouseEnter={(e) => (e.currentTarget.style.filter = "brightness(1.12)")} onMouseLeave={(e) => (e.currentTarget.style.filter = "none")}>
-              Start Training <ChevronRight size={18} />
+              {t('levelBtnStart')} <ChevronRight size={18} />
             </button>
           </div>
         )}
@@ -231,14 +233,14 @@ const LevelCard = ({ level, state, onSelect }) => {
 /* ────────────────────────────────────────────────────────────
    INSTRUCTOR GUIDE
 ──────────────────────────────────────────────────────────── */
-const InstructorGuide = ({ onDismiss }) => (
+const InstructorGuide = ({ onDismiss, t }) => (
   <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 14 }} style={{ position: "fixed", bottom: "1.5rem", left: "50%", transform: "translateX(-50%)", zIndex: 800, width: "92%", maxWidth: 440 }}>
     <div style={{ background: "rgba(28,28,28,0.97)", border: "1.5px solid rgba(255,159,28,0.55)", borderRadius: 20, padding: "1.2rem 1.4rem", boxShadow: "0 20px 60px rgba(0,0,0,0.7)", display: "flex", gap: "1rem", alignItems: "flex-start" }}>
       <div style={{ width: 52, height: 52, flexShrink: 0, borderRadius: "50%", background: "linear-gradient(135deg, #FF9F1C, #D64545)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 24, border: "2.5px solid rgba(255,159,28,0.7)", boxShadow: "0 0 18px rgba(255,159,28,0.35)" }}>👮</div>
       <div style={{ flex: 1 }}>
-        <p style={{ margin: "0 0 3px", fontSize: "0.72rem", color: "#FF9F1C", fontWeight: 700, letterSpacing: 1 }}>OFFICER SAHAY</p>
-        <p style={{ margin: "0 0 0.8rem", fontSize: "0.97rem", color: "#EAEAEA", lineHeight: 1.55 }}>"Welcome, Guardian! Follow this path from top to bottom to secure your wealth!"</p>
-        <button onClick={onDismiss} style={{ background: "linear-gradient(135deg, #FF9F1C, #D64545)", color: "#1E1E1E", border: "none", borderRadius: 10, padding: "8px 18px", fontSize: "0.88rem", fontWeight: 700, cursor: "pointer", float: "right", display: "flex", alignItems: "center", gap: 5 }}>Got it! <ChevronRight size={14} /></button>
+        <p style={{ margin: "0 0 3px", fontSize: "0.72rem", color: "#FF9F1C", fontWeight: 700, letterSpacing: 1 }}>{t('levelInstructorTitle')}</p>
+        <p style={{ margin: "0 0 0.8rem", fontSize: "0.97rem", color: "#EAEAEA", lineHeight: 1.55 }}>{t('levelInstructorWelcome')}</p>
+        <button onClick={onDismiss} style={{ background: "linear-gradient(135deg, #FF9F1C, #D64545)", color: "#1E1E1E", border: "none", borderRadius: 10, padding: "8px 18px", fontSize: "0.88rem", fontWeight: 700, cursor: "pointer", float: "right", display: "flex", alignItems: "center", gap: 5 }}>{t('levelInstructorBtn')} <ChevronRight size={14} /></button>
       </div>
     </div>
   </motion.div>
@@ -250,6 +252,7 @@ const InstructorGuide = ({ onDismiss }) => (
 const LevelMap = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useLanguage();
 
   const [progress, setProgress] = useState(() => {
     try {
@@ -295,10 +298,10 @@ const LevelMap = () => {
     <div style={{ minHeight: "100vh", background: "var(--bg-primary)", display: "flex", flexDirection: "column", fontFamily: "var(--font-body)" }}>
       <header className="glass-nav" style={{ padding: "0.75rem 1.75rem", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, zIndex: 300 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <button className="btn btn-outline" onClick={() => navigate("/banking")} style={{ padding: "6px 14px", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: 5 }}><ArrowLeft size={15} /> Back</button>
+          <button className="btn btn-outline" onClick={() => navigate("/dashboard")} style={{ padding: "6px 14px", fontSize: "0.88rem", display: "flex", alignItems: "center", gap: 5 }}><ArrowLeft size={15} /> {t('back')}</button>
           <div>
-            <h2 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-heading)", color: "var(--color-warning-orange)" }}>🏅 Safety Road</h2>
-            <p style={{ margin: 0, fontSize: "0.74rem", opacity: 0.55, color: "var(--text-primary)" }}>{progress.completed.length} of 6 levels complete</p>
+            <h2 style={{ margin: 0, fontSize: "1.15rem", fontFamily: "var(--font-heading)", color: "var(--color-warning-orange)" }}>{t('levelMapTitle')}</h2>
+            <p style={{ margin: 0, fontSize: "0.74rem", opacity: 0.55, color: "var(--text-primary)" }}>{t('levelMapProgress', { completed: progress.completed.length, total: 6 })}</p>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
@@ -308,6 +311,7 @@ const LevelMap = () => {
             </div>
             <span style={{ fontSize: "0.74rem", fontWeight: 700, color: "var(--color-warning-orange)", minWidth: 30 }}>{pct}%</span>
           </div>
+          <LanguageSelector />
           <ThemeToggle />
         </div>
       </header>
@@ -315,25 +319,25 @@ const LevelMap = () => {
       <div style={{ flex: 1, overflowY: "auto", scrollbarWidth: "thin", scrollbarColor: "rgba(255,159,28,0.3) transparent" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "2.5rem 2rem 4rem", display: "flex", flexDirection: "column", alignItems: "stretch" }}>
           <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
-            <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.9rem", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 0.4rem" }}>Banking Security Mastery</h1>
-            <p style={{ fontSize: "1rem", color: "var(--text-primary)", opacity: 0.55, margin: 0 }}>Complete each level in order to unlock the next module.</p>
+            <h1 style={{ fontFamily: "var(--font-heading)", fontSize: "1.9rem", fontWeight: 800, color: "var(--text-primary)", margin: "0 0 0.4rem" }}>{t('levelMapMainTitle')}</h1>
+            <p style={{ fontSize: "1rem", color: "var(--text-primary)", opacity: 0.55, margin: 0 }}>{t('levelMapSubtitle')}</p>
           </div>
           {LEVELS.map((level, idx) => (
             <React.Fragment key={level.id}>
-              <LevelCard level={level} state={getState(level.id)} onSelect={handleSelect} />
+              <LevelCard level={level} state={getState(level.id)} onSelect={handleSelect} t={t} />
               {idx < LEVELS.length - 1 && <Pipe fromSide={level.side} isLit={isCompleted(level.id)} litColor={LEVELS[idx + 1].color} />}
             </React.Fragment>
           ))}
           {progress.completed.length === 6 && (
             <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ marginTop: "2rem", textAlign: "center", padding: "2rem", borderRadius: 20, background: "rgba(76,175,80,0.12)", border: "2px solid rgba(76,175,80,0.4)" }}>
               <div style={{ fontSize: 56 }}>🏆</div>
-              <h2 style={{ fontFamily: "var(--font-heading)", color: "#4CAF50", margin: "0.6rem 0 0.4rem", fontSize: "1.5rem" }}>Path Complete!</h2>
-              <p style={{ color: "rgba(234,234,234,0.7)", fontSize: "1rem", margin: 0 }}>You are a Certified Digital Guardian. नमस्ते, सुरक्षित भारत!</p>
+              <h2 style={{ fontFamily: "var(--font-heading)", color: "#4CAF50", margin: "0.6rem 0 0.4rem", fontSize: "1.5rem" }}>{t('levelPathCompleteTitle')}</h2>
+              <p style={{ color: "rgba(234,234,234,0.7)", fontSize: "1rem", margin: 0 }}>{t('levelPathCompleteText')}</p>
             </motion.div>
           )}
         </div>
       </div>
-      <AnimatePresence>{showGuide && <InstructorGuide onDismiss={() => setShowGuide(false)} />}</AnimatePresence>
+      <AnimatePresence>{showGuide && <InstructorGuide onDismiss={() => setShowGuide(false)} t={t} />}</AnimatePresence>
     </div>
   );
 };

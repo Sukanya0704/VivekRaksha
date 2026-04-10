@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ThemeToggle from '../components/ThemeToggle';
+import LanguageSelector from '../components/LanguageSelector';
 
 const BrowserFrame = ({ children, url, status = 'secure' }) => {
   return (
@@ -237,7 +238,10 @@ const IdentitySafety = () => {
             {!activeModule && <span style={{ fontSize: '0.9rem', opacity: 0.7 }}>{t('startingGateTitle')}</span>}
           </div>
         </div>
-        <ThemeToggle />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <LanguageSelector />
+          <ThemeToggle />
+        </div>
       </header>
 
       {/* Main Layout */}

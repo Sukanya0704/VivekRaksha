@@ -6,6 +6,7 @@ import PageAudioButton from '../../components/PageAudioButton';
 import { playAudio } from '../../utils/audio';
 import { otpScenariosData } from '../../data/otpScenarios';
 import { markLevelComplete } from '../../utils/levelProgress';
+import LanguageSelector from '../../components/LanguageSelector';
 
 const OtpSimulator = () => {
   const { language } = useLanguage();
@@ -544,19 +545,22 @@ const OtpSimulator = () => {
   return (
     <div className="module-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary, #020617)', padding: '2rem' }}>
       {/* Header */}
-      <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', gap: '1rem' }}>
-        <button 
-          className="btn-link" 
-          onClick={() => {
-            if(step === 'quiz') setStep('hub');
-            else if(step === 'hub') setStep('intro');
-            else navigate('/banking');
-          }} 
-          style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-        >
-          <ArrowLeft size={24} /> Back
-        </button>
-        <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.title}</h2>
+      <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          <button 
+            className="btn-link" 
+            onClick={() => {
+              if(step === 'quiz') setStep('hub');
+              else if(step === 'hub') setStep('intro');
+              else navigate('/banking');
+            }} 
+            style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+          >
+            <ArrowLeft size={24} /> Back
+          </button>
+          <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.title}</h2>
+        </div>
+        <LanguageSelector />
       </header>
 
       {/* Dynamic Content Area */}
