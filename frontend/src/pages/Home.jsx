@@ -6,13 +6,11 @@ import { Shield, Globe, ArrowRight } from 'lucide-react';
 const Home = () => {
   const { language, changeLanguage, t } = useLanguage();
   const navigate = useNavigate();
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(true);
 
+  // Modal will now show every time the component mounts
   useEffect(() => {
-    const langSelected = localStorage.getItem('languageSelected');
-    if (!langSelected) {
-      setShowModal(true);
-    }
+    // We can still use this effect for other initialization if needed
   }, []);
 
   const handleLanguageSelect = (lang) => {
