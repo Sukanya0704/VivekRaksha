@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ArrowLeft, ShieldCheck, ShieldX, PhoneIncoming, MessageSquareWarning, ArrowRight, Smartphone, Globe, MessageCircle, AlertTriangle, Info, PlayCircle } from 'lucide-react';
 import PageAudioButton from '../../components/PageAudioButton';
 import { playAudio } from '../../utils/audio';
@@ -11,6 +12,7 @@ import LanguageSelector from '../../components/LanguageSelector';
 const FraudSimulatorNew = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [currentScenario, setCurrentScenario] = useState(0);
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
@@ -125,28 +127,60 @@ const FraudSimulatorNew = () => {
           <PageAudioButton text={ui.introAudio} />
         </div>
         
-        <h2 className="title-xl" style={{ marginBottom: '1rem', color: '#60A5FA', fontSize: '2.2rem', animation: 'slideInRight 0.5s ease-out' }}>
+        <h2 className="title-xl" style={{ marginBottom: '1rem', color: 'var(--accent-blue)', fontSize: '2.2rem', animation: 'slideInRight 0.5s ease-out' }}>
           <Globe size={36} style={{ verticalAlign: 'middle', marginRight: '15px' }} />
           {ui.awarenessTitle}
         </h2>
         
-        <div style={{ background: 'rgba(30, 41, 59, 0.7)', padding: '1.5rem 2rem', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid #334155', animation: 'scaleIn 0.6s ease-out' }}>
-          <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#E2E8F0', marginBottom: '1.5rem' }}>
+        <div style={{ 
+          background: 'var(--bg-secondary)', 
+          padding: '1.5rem 2rem', 
+          borderRadius: '1rem', 
+          marginBottom: '1.5rem', 
+          border: '1px solid var(--glass-border)', 
+          animation: 'scaleIn 0.6s ease-out',
+          boxShadow: 'var(--glass-shadow)'
+        }}>
+          <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>
             {ui.awarenessBasic}
           </p>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'left' }}>
-            <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10B981', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.3s' }}>
+            <div style={{ 
+              background: theme === 'light' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.2)', 
+              border: '1px solid #10B981', 
+              padding: '1.2rem', 
+              borderRadius: '0.8rem', 
+              transform: 'translateY(20px)', 
+              opacity: 0, 
+              animation: 'slideUpFade 0.5s forwards 0.3s' 
+            }}>
               <h3 style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><ShieldCheck size={20} /> Advanced</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.awarenessRule1}</p>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.awarenessRule1}</p>
             </div>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.5s' }}>
+            <div style={{ 
+              background: theme === 'light' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.2)', 
+              border: '1px solid #EF4444', 
+              padding: '1.2rem', 
+              borderRadius: '0.8rem', 
+              transform: 'translateY(20px)', 
+              opacity: 0, 
+              animation: 'slideUpFade 0.5s forwards 0.5s' 
+            }}>
               <h3 style={{ color: '#EF4444', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><AlertTriangle size={20} /> Critical</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.awarenessRule2}</p>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.awarenessRule2}</p>
             </div>
-            <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #F59E0B', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.7s' }}>
+            <div style={{ 
+              background: theme === 'light' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(245, 158, 11, 0.2)', 
+              border: '1px solid #F59E0B', 
+              padding: '1.2rem', 
+              borderRadius: '0.8rem', 
+              transform: 'translateY(20px)', 
+              opacity: 0, 
+              animation: 'slideUpFade 0.5s forwards 0.7s' 
+            }}>
               <h3 style={{ color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><MessageCircle size={20} /> Important</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.awarenessRule3}</p>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.awarenessRule3}</p>
             </div>
           </div>
         </div>
@@ -181,10 +215,10 @@ const FraudSimulatorNew = () => {
       <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', height: '100%', alignItems: 'stretch' }}>
         
         {/* LEFT PANEL: Interactive Center (70%) */}
-        <div style={{ flex: '7', background: '#1E293B', borderRadius: '1rem', border: '1px solid #334155', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ flex: '7', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column' }}>
           {/* Header */}
-          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}>
-            <span style={{ color: '#94A3B8', fontWeight: 'bold' }}>Progress: {currentScenario + 1} / {scenarios.length}</span>
+          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-nav-bg)', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 'bold', opacity: 0.7 }}>Progress: {currentScenario + 1} / {scenarios.length}</span>
             <PageAudioButton text={quizAudioText} />
           </div>
 
@@ -218,25 +252,35 @@ const FraudSimulatorNew = () => {
 
             {/* Action Buttons Layer */}
             <div style={{ marginTop: '3rem', width: '100%', maxWidth: '600px' }}>
-              <h4 style={{ marginBottom: '1.5rem', textAlign: 'center', color: '#E2E8F0', fontSize: '1.2rem' }}>What action will you take?</h4>
+              <h4 style={{ marginBottom: '1.5rem', textAlign: 'center', color: 'var(--text-primary)', fontSize: '1.2rem' }}>What action will you take?</h4>
               
               <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                <button 
-                  className="btn" 
-                  style={{ background: '#334155', color: 'white', padding: '1.2rem', borderRadius: '12px', fontSize: '1.1rem', textAlign: 'center', border: '1px solid #475569', transition: 'all 0.2s', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer' }} 
-                  onClick={() => handleDecision(scenario.actionPositive.isCorrect)} 
-                  disabled={showResult}
-                >
-                  {scenario.actionPositive.text}
-                </button>
-                <button 
-                  className="btn" 
-                  style={{ background: '#334155', color: 'white', padding: '1.2rem', borderRadius: '12px', fontSize: '1.1rem', textAlign: 'center', border: '1px solid #475569', transition: 'all 0.2s', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer' }}  
-                  onClick={() => handleDecision(scenario.actionNegative.isCorrect)} 
-                  disabled={showResult}
-                >
-                  {scenario.actionNegative.text}
-                </button>
+                {[scenario.actionPositive, scenario.actionNegative]
+                  .map((action, idx) => ({ action, idx }))
+                  .sort((a, b) => (currentScenario % 2 === 1 ? b.idx - a.idx : a.idx - b.idx))
+                  .map(({ action }) => (
+                    <button 
+                      key={action.text}
+                      className="btn" 
+                      style={{ 
+                        background: 'var(--bg-secondary)', 
+                        color: 'var(--text-primary)', 
+                        padding: '1.2rem', 
+                        borderRadius: '12px', 
+                        fontSize: '1.1rem', 
+                        textAlign: 'center', 
+                        border: '1px solid var(--glass-border)', 
+                        transition: 'all 0.2s', 
+                        opacity: showResult ? 0.5 : 1, 
+                        cursor: showResult ? 'not-allowed' : 'pointer',
+                        boxShadow: 'var(--glass-shadow)'
+                      }} 
+                      onClick={() => handleDecision(action.isCorrect)} 
+                      disabled={showResult}
+                    >
+                      {action.text}
+                    </button>
+                  ))}
               </div>
             </div>
 
@@ -244,9 +288,9 @@ const FraudSimulatorNew = () => {
         </div>
 
         {/* RIGHT PANEL: Side Pop-out Support Panel (30%) */}
-        <div style={{ flex: '3', background: '#0F172A', borderRadius: '1rem', border: '1px solid #334155', padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div style={{ flex: '3', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px solid var(--glass-border)', padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {!showResult ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748B', textAlign: 'center', opacity: 0.7 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-primary)', textAlign: 'center', opacity: 0.5 }}>
               <Info size={60} style={{ marginBottom: '1.5rem' }} />
               <p style={{ fontSize: '1.2rem' }}>{ui.sidePanelWait}</p>
             </div>
@@ -254,7 +298,7 @@ const FraudSimulatorNew = () => {
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
               
               {/* Outcome Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #334155' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
                 {isCorrect ? <ShieldCheck color="#10B981" size={48} /> : <ShieldX color="#EF4444" size={48} />}
                 <h3 style={{ color: isCorrect ? '#10B981' : '#EF4444', fontSize: '1.6rem', margin: 0 }}>
                   {isCorrect ? ui.correctTitle : ui.wrongTitle}
@@ -267,10 +311,10 @@ const FraudSimulatorNew = () => {
                 {/* Show what happens if you fall for it (Only if Wrong) */}
                 {!isCorrect && scenario.consequenceWrong && (
                   <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #EF4444' }}>
-                    <p style={{ color: '#FCA5A5', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                    <p style={{ color: '#EF4444', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
                       {ui.whyWrong}
                     </p>
-                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
                       {scenario.consequenceWrong}
                     </p>
                   </div>
@@ -278,11 +322,11 @@ const FraudSimulatorNew = () => {
 
                 {/* Show how to stay safe / identify truth (Only if Correct) */}
                 {isCorrect && scenario.explanationRight && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981' }}>
-                    <p style={{ color: '#6EE7B7', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
+                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981', background: theme === 'light' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.1)' }}>
+                    <p style={{ color: '#10B981', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
                       {ui.whyCorrect}
                     </p>
-                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
                       {scenario.explanationRight}
                     </p>
                   </div>
@@ -292,10 +336,10 @@ const FraudSimulatorNew = () => {
               {/* Red Flags Block */}
               {scenario.redFlags && scenario.redFlags.length > 0 && (
                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #EF4444', padding: '1rem 1.5rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#FCA5A5', fontWeight: 'bold', marginBottom: '0.8rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#EF4444', fontWeight: 'bold', marginBottom: '0.8rem' }}>
                     <AlertTriangle size={18} /> {ui.redFlags}
                   </span>
-                  <ul style={{ color: '#FECACA', fontSize: '0.95rem', paddingLeft: '1.5rem', margin: 0, lineHeight: '1.5' }}>
+                  <ul style={{ color: 'var(--text-primary)', fontSize: '0.95rem', paddingLeft: '1.5rem', margin: 0, lineHeight: '1.5', opacity: 0.9 }}>
                     {scenario.redFlags.map((flag, idx) => <li key={idx} style={{ marginBottom: '0.4rem' }}>{flag}</li>)}
                   </ul>
                 </div>
@@ -303,8 +347,8 @@ const FraudSimulatorNew = () => {
 
               {/* Contextual Video Suggestion (If Wrong or If Configured) */}
               {(!isCorrect && scenario.videoId) && (
-                <div style={{ background: '#1E293B', padding: '1.5rem', borderRadius: '1rem', border: '1px solid #3B82F6', marginBottom: '2rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#60A5FA', fontWeight: 'bold', marginBottom: '1rem' }}>
+                <div style={{ background: 'var(--bg-primary)', padding: '1.5rem', borderRadius: '1rem', border: '1px solid var(--accent-blue)', marginBottom: '2rem' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--accent-blue)', fontWeight: 'bold', marginBottom: '1rem' }}>
                     <PlayCircle size={20} /> {ui.watchGuide}
                   </span>
                   <div style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '0.5rem' }}>
@@ -357,9 +401,9 @@ const FraudSimulatorNew = () => {
           <ShieldX size={100} color="#F59E0B" style={{ marginBottom: '2rem', display: 'inline-block' }} />
         )}
         
-        <h2 className="title-lg" style={{ marginBottom: '1rem' }}>{ui.scoreText}</h2>
-        <p style={{ fontSize: '1.4rem', color: '#94A3B8', marginBottom: '1rem' }}>
-          Score: <strong style={{ color: isPerfect ? '#10B981' : '#F59E0B' }}>{score}</strong> out of <strong style={{ color: '#F8FAFC' }}>{scenarios.length}</strong>
+        <h2 className="title-lg" style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>{ui.scoreText}</h2>
+        <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', opacity: 0.7, marginBottom: '1rem' }}>
+          Score: <strong style={{ color: isPerfect ? '#10B981' : '#F59E0B' }}>{score}</strong> out of <strong style={{ color: 'var(--text-primary)' }}>{scenarios.length}</strong>
         </p>
 
         <div style={{ background: isPerfect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2.5rem' }}>
@@ -387,10 +431,10 @@ const FraudSimulatorNew = () => {
       {/* Header */}
       <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <button className="btn-link" onClick={() => navigate('/banking')} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}>
             <ArrowLeft size={24} /> Back
           </button>
-          <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.awarenessTitle}</h2>
+          <h2 className="title-lg" style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.6rem' }}>{ui.awarenessTitle}</h2>
         </div>
         <LanguageSelector />
       </header>

@@ -27,7 +27,7 @@ const PageAudioButton = ({ text }) => {
         title="Listen to this page"
         type="button"
       >
-        <Volume2 size={24} /> {t('listenToScreen') || 'Listen to Screen'}
+        {t('listenToScreen') || 'Listen to Screen'}
       </button>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { useTheme } from '../../context/ThemeContext';
 import { ArrowLeft, ShieldCheck, ShieldX, Wallet, Landmark, ShieldAlert, ArrowRight, Smartphone, MessageCircle, AlertTriangle, Info, PlayCircle, ExternalLink, Lock, Globe } from 'lucide-react';
 import PageAudioButton from '../../components/PageAudioButton';
 import { playAudio } from '../../utils/audio';
@@ -11,6 +12,7 @@ import LanguageSelector from '../../components/LanguageSelector';
 const OtpSimulator = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { theme } = useTheme();
   
   // App State Navigation
   const [step, setStep] = useState('intro'); // intro, hub, quiz, final
@@ -23,6 +25,8 @@ const OtpSimulator = () => {
   const [isCorrect, setIsCorrect] = useState(false);
   const [score, setScore] = useState(0);
   const [inputVal, setInputVal] = useState('');
+  const [inputVal2, setInputVal2] = useState('');
+  const [inputVal3, setInputVal3] = useState('');
 
   // 1. Get complete language data
   const fullData = otpScenariosData[language] || otpScenariosData['en'];
@@ -138,19 +142,18 @@ const OtpSimulator = () => {
     setStep('quiz');
     setSubStep('sms');
     setShowResult(false);
+    setInputVal('');
+    setInputVal2('');
+    setInputVal3('');
   };
 
   const handleDecisionSecure = () => {
-    // User chose to "Delete Message"
     const scenario = activeScenarios[currentScenarioIdx];
-    
     if (scenario.isLegitimate) {
-      // Deleted a real, important message - Wrong!
       setIsCorrect(false);
       let audioText = `${ui.wrongTitle}. ${ui.whyWrong} ${scenario.consequenceWrong}`;
       playAudio(audioText, language);
     } else {
-      // Ignored a scam - Secure & Correct!
       setIsCorrect(true);
       setScore(score + 1);
       let audioText = `${ui.correctTitle}. ${ui.whyCorrect} ${scenario.explanationRight}`;
@@ -160,23 +163,20 @@ const OtpSimulator = () => {
   };
 
   const handleDecisionOpenLink = () => {
-    // User chose to open the malicious link -> Enter Sandbox mode!
     setSubStep('sandbox');
     setInputVal('');
+    setInputVal2('');
+    setInputVal3('');
   };
 
   const handleSandboxSubmit = () => {
-    // User typed into the portal and clicked submit
     const scenario = activeScenarios[currentScenarioIdx];
-    
     if (scenario.isLegitimate) {
-      // Submitted details into an official, secure portal - Correct!
       setIsCorrect(true);
       setScore(score + 1);
       let audioText = `${ui.correctTitle}. ${ui.whyCorrect} ${scenario.explanationRight}`;
       playAudio(audioText, language);
     } else {
-      // Submitted details to a phishing portal - Danger!
       setIsCorrect(false);
       let audioText = `${ui.wrongTitle}. ${ui.whyWrong} ${scenario.consequenceWrong}`;
       playAudio(audioText, language);
@@ -190,6 +190,8 @@ const OtpSimulator = () => {
       setSubStep('sms');
       setShowResult(false);
       setInputVal('');
+      setInputVal2('');
+      setInputVal3('');
     } else {
       setStep('final');
     }
@@ -204,45 +206,28 @@ const OtpSimulator = () => {
         <div style={{ marginBottom: '1rem', animation: 'slideInLeft 0.5s ease-out' }}>
           <PageAudioButton text={ui.introAudio} />
         </div>
-        
         <Lock size={48} color="#EF4444" style={{ marginBottom: '0.8rem', display: 'inline-block', animation: 'scaleIn 0.5s ease-out' }} />
-        
-        <h2 className="title-xl" style={{ marginBottom: '1rem', color: '#60A5FA', fontSize: '2.2rem', animation: 'slideInRight 0.5s ease-out' }}>
-          {ui.title}
-        </h2>
-        
-        <div style={{ background: 'rgba(30, 41, 59, 0.7)', padding: '1.5rem 2rem', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid #334155', animation: 'scaleIn 0.6s ease-out' }}>
-          <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: '#E2E8F0', marginBottom: '1.5rem' }}>
-            {ui.introBasic}
-          </p>
-
+        <h2 className="title-xl" style={{ marginBottom: '1rem', color: 'var(--accent-blue)', fontSize: '2.2rem', animation: 'slideInRight 0.5s ease-out' }}>{ui.title}</h2>
+        <div style={{ background: 'var(--bg-secondary)', padding: '1.5rem 2rem', borderRadius: '1rem', marginBottom: '1.5rem', border: '1px solid var(--glass-border)', animation: 'scaleIn 0.6s ease-out', boxShadow: 'var(--glass-shadow)' }}>
+          <p style={{ fontSize: '1.1rem', lineHeight: '1.6', color: 'var(--text-primary)', marginBottom: '1.5rem' }}>{ui.introBasic}</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', textAlign: 'left' }}>
-            <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid #10B981', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.3s' }}>
+            <div style={{ background: theme === 'light' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.15)', border: '1px solid #10B981', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.3s' }}>
               <h3 style={{ color: '#10B981', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><ShieldCheck size={20} /> Advanced</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule1}</p>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.rule1}</p>
             </div>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid #EF4444', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.5s' }}>
-              <h3 style={{ color: '#FCA5A5', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><Globe size={20} /> Identity</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule2}</p>
+            <div style={{ background: theme === 'light' ? 'rgba(59, 130, 246, 0.1)' : 'rgba(59, 130, 246, 0.15)', border: '1px solid #3B82F6', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.5s' }}>
+              <h3 style={{ color: 'var(--accent-blue)', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><Globe size={20} /> Identity</h3>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.rule2}</p>
             </div>
-            <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid #F59E0B', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.7s' }}>
-              <h3 style={{ color: '#F59E0B', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><AlertTriangle size={20} /> Critical</h3>
-              <p style={{ fontSize: '0.95rem', lineHeight: '1.4' }}>{ui.rule3}</p>
+            <div style={{ background: theme === 'light' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.15)', border: '1px solid #EF4444', padding: '1.2rem', borderRadius: '0.8rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.7s' }}>
+              <h3 style={{ color: '#EF4444', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.8rem', fontSize: '1rem' }}><AlertTriangle size={20} /> Critical</h3>
+              <p style={{ fontSize: '0.95rem', lineHeight: '1.4', color: 'var(--text-primary)' }}>{ui.rule3}</p>
             </div>
           </div>
         </div>
-
-        <button 
-          className="btn btn-primary" 
-          style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', borderRadius: '3rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.9s', transition: 'all 0.3s ease' }} 
-          onClick={() => setStep('hub')}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
+        <button className="btn btn-primary" style={{ width: '100%', fontSize: '1.2rem', padding: '1rem', borderRadius: '3rem', transform: 'translateY(20px)', opacity: 0, animation: 'slideUpFade 0.5s forwards 0.9s', transition: 'all 0.3s ease' }} onClick={() => setStep('hub')}>
           {ui.startBtn} <ArrowRight size={24} style={{ marginLeft: '10px', animation: 'bounceX 2s infinite' }} />
         </button>
-
-        {/* Dynamic Keyframes for smooth UI entrance */}
         <style dangerouslySetInnerHTML={{__html: `
           @keyframes slideUpFade { to { opacity: 1; transform: translateY(0); } }
           @keyframes bounceX { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(5px); } }
@@ -258,39 +243,19 @@ const OtpSimulator = () => {
     return (
       <div className="glass-panel animate-fade-in" style={{ padding: '3rem', textAlign: 'center', maxWidth: '1000px', margin: '0 auto' }}>
         <PageAudioButton text={ui.hubAudio} />
-        <h3 style={{ fontSize: '2rem', marginBottom: '3rem', color: '#E2E8F0' }}>
-          {ui.hubTitle}
-        </h3>
-
+        <h3 style={{ fontSize: '2rem', marginBottom: '3rem', color: 'var(--text-primary)' }}>{ui.hubTitle}</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '2rem' }}>
-          <div
-            onClick={() => handleCategorySelect('tax')}
-            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
-            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#10B981'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
+          <div onClick={() => handleCategorySelect('tax')} style={{ background: 'var(--bg-secondary)', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '2px solid var(--glass-border)', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', boxShadow: 'var(--glass-shadow)' }} onMouseOver={(e) => { e.currentTarget.style.borderColor = '#10B981'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
             <Landmark size={60} color="#10B981" />
-            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubTax}</h4>
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{ui.hubTax}</h4>
           </div>
-
-          <div
-            onClick={() => handleCategorySelect('kyc')}
-            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
-            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#EF4444'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-             <ShieldAlert size={60} color="#EF4444" />
-            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubKYC}</h4>
+          <div onClick={() => handleCategorySelect('kyc')} style={{ background: 'var(--bg-secondary)', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '2px solid var(--glass-border)', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', boxShadow: 'var(--glass-shadow)' }} onMouseOver={(e) => { e.currentTarget.style.borderColor = '#EF4444'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+            <ShieldAlert size={60} color="#EF4444" />
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{ui.hubKYC}</h4>
           </div>
-
-          <div
-            onClick={() => handleCategorySelect('upi')}
-            style={{ background: '#2A2A2A', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '3px solid #4B5563', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem' }}
-            onMouseOver={(e) => { e.currentTarget.style.borderColor = '#F59E0B'; e.currentTarget.style.transform = 'translateY(-10px)'; }}
-            onMouseOut={(e) => { e.currentTarget.style.borderColor = '#4B5563'; e.currentTarget.style.transform = 'translateY(0)'; }}
-          >
-             <Wallet size={60} color="#F59E0B" />
-            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold' }}>{ui.hubUPI}</h4>
+          <div onClick={() => handleCategorySelect('upi')} style={{ background: 'var(--bg-secondary)', borderRadius: '24px', padding: '2rem', cursor: 'pointer', border: '2px solid var(--glass-border)', transition: 'all 0.3s', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1.5rem', boxShadow: 'var(--glass-shadow)' }} onMouseOver={(e) => { e.currentTarget.style.borderColor = '#F59E0B'; e.currentTarget.style.transform = 'translateY(-10px)'; }} onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; e.currentTarget.style.transform = 'translateY(0)'; }}>
+            <Wallet size={60} color="#F59E0B" />
+            <h4 style={{ fontSize: '1.4rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>{ui.hubUPI}</h4>
           </div>
         </div>
       </div>
@@ -305,67 +270,69 @@ const OtpSimulator = () => {
 
     return (
       <div className="animate-fade-in" style={{ display: 'flex', gap: '1.5rem', height: '100%', alignItems: 'stretch' }}>
-        
-        {/* LEFT PANEL: Interactive Center (70%) */}
-        <div style={{ flex: '7', background: '#1E293B', borderRadius: '1rem', border: '1px solid #334155', display: 'flex', flexDirection: 'column' }}>
-          
-          {/* Header */}
-          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(15, 23, 42, 0.5)', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}>
-            <span style={{ color: '#94A3B8', fontWeight: 'bold', textTransform: 'uppercase' }}>{activeCategory} : {currentScenarioIdx + 1} / {activeScenarios.length}</span>
+        <div style={{ flex: '7', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px solid var(--glass-border)', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '1rem 2rem', borderBottom: '1px solid var(--glass-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--glass-nav-bg)', borderTopLeftRadius: '1rem', borderTopRightRadius: '1rem' }}>
+            <span style={{ color: 'var(--text-primary)', fontWeight: 'bold', textTransform: 'uppercase', opacity: 0.7 }}>{activeCategory} : {currentScenarioIdx + 1} / {activeScenarios.length}</span>
             <PageAudioButton text={quizAudioText} />
           </div>
-
-          {/* Interactive Simulation Area */}
           <div style={{ flex: '1', display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '2rem', overflowY: 'auto', position: 'relative' }}>
-            
-            {/* PHONE MOCKUP CONTAINER */}
-            <div style={{ width: '100%', maxWidth: '360px', flex: 1, minHeight: '500px', maxHeight: '720px', background: '#000000', borderRadius: '40px', border: '12px solid #1E293B', position: 'relative', boxShadow: '0 25px 30px -5px rgba(0, 0, 0, 0.7)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
-              
-              {/* Phone Status Bar */}
+            <div style={{ width: '100%', maxWidth: '360px', flex: 1, minHeight: '500px', maxHeight: '720px', background: '#000000', borderRadius: '40px', border: '12px solid var(--bg-primary)', position: 'relative', boxShadow: '0 25px 30px -5px rgba(0, 0, 0, 0.4)', display: 'flex', flexDirection: 'column', overflow: 'hidden', flexShrink: 0 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: subStep === 'sms' ? '#F3F4F6' : '#FFFFFF', color: '#000000', padding: '10px 20px', fontSize: '0.8rem', fontWeight: 'bold', zIndex: 10, flexShrink: 0 }}>
                  <span>11:42 AM</span>
                  <div style={{ width: '80px', height: '20px', background: '#000000', borderRadius: '15px', position: 'absolute', left: '50%', transform: 'translateX(-50%)', top: '10px' }}></div>
                  <span>5G 🔋</span>
               </div>
-
               {subStep === 'sms' ? (
-                // PHASE 1: FAKE SMS APP
                 <div className="animate-fade-in" style={{ flex: 1, background: '#F3F4F6', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                  
-                  {/* SMS Header */}
                   <div style={{ background: '#F3F4F6', padding: '15px', textAlign: 'center', borderBottom: '1px solid #D1D5DB', flexShrink: 0 }}>
                     <div style={{ width: '40px', height: '40px', background: '#9CA3AF', borderRadius: '50%', margin: '0 auto 8px', display: 'flex', justifyContent: 'center', alignItems: 'center', color: '#FFF' }}>
                       <MessageCircle size={20} />
                     </div>
                     <span style={{ fontSize: '0.9rem', color: '#111827', fontWeight: 'bold' }}>{scenario.sender}</span>
                   </div>
-
-                  {/* SMS Body */}
                   <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                    <div style={{ textAlign: 'center', color: '#6B7280', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>
-                      {ui.actionQuestion || "New Message Received"}
-                    </div>
-                    <div style={{ background: '#E5E7EB', padding: '15px', borderRadius: '18px 18px 18px 4px', fontSize: '1rem', lineHeight: '1.5', color: '#111827', maxWidth: '85%', marginBottom: '20px', position: 'relative' }}>
-                      {scenario.content}
-                    </div>
+                    <div style={{ textAlign: 'center', color: '#6B7280', fontSize: '0.8rem', marginBottom: '15px', fontWeight: 'bold', textTransform: 'uppercase' }}>{ui.actionQuestion || "New Message Received"}</div>
+                    <div style={{ background: '#E5E7EB', padding: '15px', borderRadius: '18px 18px 18px 4px', fontSize: '1rem', lineHeight: '1.5', color: '#111827', maxWidth: '85%', marginBottom: '20px', position: 'relative' }}>{scenario.content}</div>
                   </div>
-
-                  {/* Neutral OS Action Bar */}
-                  <div style={{ background: '#FFFFFF', borderTop: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', flexShrink: 0, paddingBottom: '20px' }}>
+                  <div style={{ background: '#FFFFFF', borderTop: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', flexShrink: 0, paddingBottom: '20px', padding: '20px', gap: '10px' }}>
                     <button 
-                      style={{ padding: '16px', background: 'transparent', border: 'none', borderBottom: '1px solid #F3F4F6', color: '#3B82F6', fontSize: '1.1rem', fontWeight: 'bold', cursor: showResult ? 'not-allowed' : 'pointer', opacity: showResult ? 0.5 : 1, transition: 'background 0.2s' }}
-                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.background = '#F9FAFB' }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
-                      onClick={handleDecisionOpenLink}
+                      style={{ 
+                        padding: '16px', 
+                        background: '#3B82F6', 
+                        border: 'none', 
+                        borderRadius: '12px',
+                        color: '#FFFFFF', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 'bold', 
+                        cursor: showResult ? 'not-allowed' : 'pointer', 
+                        opacity: showResult ? 0.5 : 1, 
+                        transition: 'all 0.2s',
+                        boxShadow: '0 4px 6px rgba(59, 130, 246, 0.3)'
+                      }} 
+                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.transform = 'scale(1.02)' }} 
+                      onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)' }} 
+                      onClick={handleDecisionOpenLink} 
                       disabled={showResult}
                     >
                       {ui.btnOpen}
                     </button>
                     <button 
-                      style={{ padding: '16px', background: 'transparent', border: 'none', color: '#EF4444', fontSize: '1.1rem', fontWeight: 'bold', cursor: showResult ? 'not-allowed' : 'pointer', opacity: showResult ? 0.5 : 1, transition: 'background 0.2s' }}
-                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.background = '#FEF2F2' }}
-                      onMouseOut={(e) => { e.currentTarget.style.background = 'transparent' }}
-                      onClick={handleDecisionSecure}
+                      style={{ 
+                        padding: '16px', 
+                        background: '#EF4444', 
+                        border: 'none', 
+                        borderRadius: '12px',
+                        color: '#FFFFFF', 
+                        fontSize: '1.1rem', 
+                        fontWeight: 'bold', 
+                        cursor: showResult ? 'not-allowed' : 'pointer', 
+                        opacity: showResult ? 0.5 : 1, 
+                        transition: 'all 0.2s',
+                        boxShadow: '0 4px 6px rgba(239, 68, 68, 0.3)'
+                      }} 
+                      onMouseOver={(e) => { if(!showResult) e.currentTarget.style.transform = 'scale(1.02)' }} 
+                      onMouseOut={(e) => { e.currentTarget.style.transform = 'scale(1)' }} 
+                      onClick={handleDecisionSecure} 
                       disabled={showResult}
                     >
                       {ui.btnIgnore}
@@ -373,125 +340,81 @@ const OtpSimulator = () => {
                   </div>
                 </div>
               ) : (
-                // PHASE 2: FAKE BROWSER SANDBOX
                 <div className="animate-fade-in" style={{ flex: 1, background: '#FFFFFF', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
-                  
-                  {/* Fake Browser Toolbar */}
                   <div style={{ background: '#F8FAFC', padding: '15px 15px 10px', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
-                     <div style={{ background: '#E2E8F0', flex: 1, padding: '8px 12px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
-                        <Lock size={14} color="#64748B" /> 
-                        <span style={{ fontSize: '0.9rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scenario.sandbox.fakeUrl}</span>
-                     </div>
+                      <div style={{ background: '#E2E8F0', flex: 1, padding: '8px 12px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '8px', color: '#475569' }}>
+                         <Lock size={14} color="#64748B" /> 
+                         <span style={{ fontSize: '0.9rem', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{scenario.sandbox.fakeUrl}</span>
+                      </div>
                   </div>
-
-                  {/* Fake Website Content */}
                   <div style={{ padding: '30px 20px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', overflowY: 'auto' }}>
-                    <h4 style={{ color: '#0F172A', fontWeight: 'bold', fontSize: '1.5rem', marginBottom: '2rem', textAlign: 'center' }}>
-                      {scenario.sandbox.title}
-                    </h4>
-            
-                    <div style={{ width: '100%', marginBottom: '20px', flexShrink: 0 }}>
-                      <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>
-                        {scenario.sandbox.inputLabel}
-                      </label>
-                      <input
-                        type={scenario.category === 'upi' ? "password" : "text"}
-                        value={inputVal}
-                        onChange={(e) => setInputVal(e.target.value)}
-                        placeholder="..."
-                        disabled={showResult}
-                        style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '1.2rem', background: showResult ? '#F8FAFC' : '#FFFFFF', outline: 'none' }}
-                      />
-                    </div>
-                    
-                    <button
-                      style={{ width: '100%', background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', opacity: showResult ? 0.5 : 1, cursor: showResult ? 'not-allowed' : 'pointer', flexShrink: 0 }}
-                      onClick={handleSandboxSubmit}
-                      disabled={showResult || inputVal.trim() === ''}
-                    >
-                      {scenario.sandbox.btnText}
-                    </button>
-            
+                    <h4 style={{ color: '#0F172A', fontWeight: 'bold', fontSize: '1.5rem', marginBottom: '2rem', textAlign: 'center' }}>{scenario.sandbox.title}</h4>
+                    {(() => {
+                      const delimiters = [", ", " & ", " और ", " आणि "];
+                      let labelText = scenario.sandbox.inputLabel;
+                      delimiters.forEach(d => { labelText = labelText.split(d).join("###"); });
+                      let fieldLabels = labelText.split("###").filter(l => l.trim().length > 0);
+                      fieldLabels = fieldLabels.map(l => l.trim().replace(/^Enter\s+/i, '').replace(/^दर्ज करें\s+/i, ''));
+                      const inputs = [inputVal, inputVal2, inputVal3];
+                      const setters = [setInputVal, setInputVal2, setInputVal3];
+                      const allFieldsFilled = fieldLabels.every((_, i) => (inputs[i] || "").trim() !== '');
+                      return (
+                        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '20px', flexShrink: 0 }}>
+                          {fieldLabels.map((lbl, idx) => (
+                            <div key={idx} style={{ width: '100%' }}>
+                              <label style={{ display: 'block', marginBottom: '8px', fontSize: '0.95rem', color: '#334155', fontWeight: '500' }}>{lbl.endsWith(':') ? lbl : lbl + ':'}</label>
+                              <input type={(lbl.toLowerCase().includes('password') || lbl.toLowerCase().includes('pin') || scenario.category === 'upi') ? "password" : "text"} value={inputs[idx] || ""} onChange={(e) => setters[idx](e.target.value)} placeholder="..." disabled={showResult} style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #CBD5E1', fontSize: '1.2rem', background: showResult ? '#F8FAFC' : '#FFFFFF', outline: 'none' }} />
+                            </div>
+                          ))}
+                          <button style={{ width: '100%', background: '#EF4444', color: '#FFFFFF', border: 'none', padding: '14px', borderRadius: '8px', fontSize: '1.1rem', fontWeight: 'bold', marginTop: '10px', opacity: (showResult || !allFieldsFilled) ? 0.5 : 1, cursor: (showResult || !allFieldsFilled) ? 'not-allowed' : 'pointer', flexShrink: 0 }} onClick={handleSandboxSubmit} disabled={showResult || !allFieldsFilled}>{scenario.sandbox.btnText}</button>
+                        </div>
+                      );
+                    })()}
                     <p style={{ marginTop: 'auto', fontSize: '0.85rem', color: '#94A3B8', fontWeight: 'bold', padding: '20px 0' }}>{ui.sandboxWarning}</p>
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
-
-        {/* RIGHT PANEL: Side Pop-out Support Panel (30%) */}
-        <div style={{ flex: '3', background: '#0F172A', borderRadius: '1rem', border: '1px solid #334155', padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
+        <div style={{ flex: '3', background: 'var(--bg-secondary)', borderRadius: '1rem', border: '1px solid var(--glass-border)', padding: '2rem', display: 'flex', flexDirection: 'column', overflowY: 'auto' }}>
           {!showResult ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: '#64748B', textAlign: 'center', opacity: 0.7 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', color: 'var(--text-primary)', textAlign: 'center', opacity: 0.5 }}>
               <Info size={60} style={{ marginBottom: '1.5rem' }} />
               <p style={{ fontSize: '1.2rem' }}>{ui.sidePanelWait}</p>
             </div>
           ) : (
             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column' }}>
-              
-              {/* Outcome Header */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid #334155' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem', paddingBottom: '1.5rem', borderBottom: '1px solid var(--glass-border)' }}>
                 {isCorrect ? <ShieldCheck color="#10B981" size={48} style={{ flexShrink: 0 }} /> : <ShieldX color="#EF4444" size={48} style={{ flexShrink: 0, animation: 'bounce 1s infinite' }} />}
-                <h3 style={{ color: isCorrect ? '#10B981' : '#EF4444', fontSize: '1.6rem', margin: 0 }}>
-                  {isCorrect ? ui.correctTitle : ui.wrongTitle}
-                </h3>
+                <h3 style={{ color: isCorrect ? '#10B981' : '#EF4444', fontSize: '1.6rem', margin: 0 }}>{isCorrect ? ui.correctTitle : ui.wrongTitle}</h3>
               </div>
-
-              {/* Detailed Explanation */}
               <div style={{ marginBottom: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                
-                {/* Show what happens if you fall for it (Only if Wrong) */}
                 {!isCorrect && scenario.consequenceWrong && (
                   <div style={{ background: 'rgba(239, 68, 68, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #EF4444' }}>
-                    <p style={{ color: '#FCA5A5', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
-                      {ui.whyWrong}
-                    </p>
-                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
-                      {scenario.consequenceWrong}
-                    </p>
+                    <p style={{ color: '#EF4444', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>{ui.whyWrong}</p>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>{scenario.consequenceWrong}</p>
                   </div>
                 )}
-
-                {/* Show how to stay safe / identify truth (Only if Correct) */}
                 {isCorrect && scenario.explanationRight && (
                   <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981' }}>
-                    <p style={{ color: '#6EE7B7', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
-                      {ui.whyCorrect}
-                    </p>
-                    <p style={{ color: '#F8FAFC', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>
-                      {scenario.explanationRight}
-                    </p>
+                    <p style={{ color: '#10B981', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>{ui.whyCorrect}</p>
+                    <p style={{ color: 'var(--text-primary)', fontSize: '1.05rem', lineHeight: '1.5', margin: 0, whiteSpace: 'pre-line' }}>{scenario.explanationRight}</p>
                   </div>
                 )}
               </div>
-
-              {/* Red Flags Block */}
               {scenario.redFlags && scenario.redFlags.length > 0 && (
                 <div style={{ background: 'rgba(239, 68, 68, 0.1)', borderLeft: '4px solid #EF4444', padding: '1rem 1.5rem', borderRadius: '0.5rem', marginBottom: '2rem' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#FCA5A5', fontWeight: 'bold', marginBottom: '0.8rem' }}>
-                    <AlertTriangle size={18} /> {ui.redFlags}
-                  </span>
-                  <ul style={{ color: '#FECACA', fontSize: '0.95rem', paddingLeft: '1.5rem', margin: 0, lineHeight: '1.5' }}>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#EF4444', fontWeight: 'bold', marginBottom: '0.8rem' }}><AlertTriangle size={18} /> {ui.redFlags}</span>
+                  <ul style={{ color: 'var(--text-primary)', fontSize: '0.95rem', paddingLeft: '1.5rem', margin: 0, lineHeight: '1.5', opacity: 0.9 }}>
                     {scenario.redFlags.map((flag, idx) => <li key={idx} style={{ marginBottom: '0.4rem' }}>{flag}</li>)}
                   </ul>
                 </div>
               )}
-
-              {/* Next Button */}
-              <button 
-                className="btn btn-primary" 
-                style={{ marginTop: 'auto', padding: '1.2rem', width: '100%', fontSize: '1.1rem', borderRadius: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} 
-                onClick={nextScenario}
-              >
-                {ui.nextScenario} <ArrowRight size={20} />
-              </button>
-
+              <button className="btn btn-primary" style={{ marginTop: 'auto', padding: '1.2rem', width: '100%', fontSize: '1.1rem', borderRadius: '1rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }} onClick={nextScenario}>{ui.nextScenario} <ArrowRight size={20} /></button>
             </div>
           )}
         </div>
-
       </div>
     );
   };
@@ -502,41 +425,23 @@ const OtpSimulator = () => {
       const storedUser = JSON.parse(localStorage.getItem('user'));
       if (storedUser && storedUser.name) userName = storedUser.name;
     } catch { /* ignore */ }
-
     const isPerfect = score === activeScenarios.length;
     let message = isPerfect ? ui.perfectScore : ui.imperfectScore;
     message = message.replace('{name}', userName);
-
     return (
       <div className="glass-panel animate-fade-in" style={{ textAlign: 'center', padding: '4rem 2rem', maxWidth: '600px', margin: '0 auto' }}>
         <PageAudioButton text={`${ui.scoreText}. ${message}. Your score is ${score} out of ${activeScenarios.length}.`} />
-        
-        {isPerfect ? (
-          <ShieldCheck size={100} color="#10B981" style={{ marginBottom: '2rem', display: 'inline-block' }} />
-        ) : (
-          <ShieldX size={100} color="#F59E0B" style={{ marginBottom: '2rem', display: 'inline-block' }} />
-        )}
-        
-        <h2 className="title-lg" style={{ marginBottom: '1rem' }}>{ui.scoreText}</h2>
-        <p style={{ fontSize: '1.4rem', color: '#94A3B8', marginBottom: '1rem' }}>
-          Score: <strong style={{ color: isPerfect ? '#10B981' : '#F59E0B' }}>{score}</strong> out of <strong style={{ color: '#F8FAFC' }}>{activeScenarios.length}</strong>
-        </p>
-
+        {isPerfect ? <ShieldCheck size={100} color="#10B981" style={{ marginBottom: '2rem', display: 'inline-block' }} /> : <ShieldX size={100} color="#F59E0B" style={{ marginBottom: '2rem', display: 'inline-block' }} />}
+        <h2 className="title-lg" style={{ marginBottom: '1rem', color: 'var(--text-primary)' }}>{ui.scoreText}</h2>
+        <p style={{ fontSize: '1.4rem', color: 'var(--text-primary)', opacity: 0.7, marginBottom: '1rem' }}>Score: <strong style={{ color: isPerfect ? '#10B981' : '#F59E0B' }}>{score}</strong> out of <strong style={{ color: 'var(--text-primary)' }}>{activeScenarios.length}</strong></p>
         <div style={{ background: isPerfect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)', padding: '1.5rem', borderRadius: '1rem', marginBottom: '2.5rem' }}>
-           <p style={{ fontSize: '1.2rem', color: isPerfect ? '#6EE7B7' : '#FCD34D', margin: 0 }}>
-             {message}
-           </p>
+           <p style={{ fontSize: '1.2rem', color: isPerfect ? '#6EE7B7' : '#FCD34D', margin: 0 }}>{message}</p>
         </div>
-
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1.5rem', flexDirection: 'column' }}>
           {!isPerfect && (
-             <button className="btn btn-primary" style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => { setCurrentScenarioIdx(0); setScore(0); setSubStep('sms'); setShowResult(false); setStep('quiz') }}>
-              {ui.tryAgainBtn}
-            </button>
+             <button className="btn btn-primary" style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => { setCurrentScenarioIdx(0); setScore(0); setSubStep('sms'); setShowResult(false); setStep('quiz') }}>{ui.tryAgainBtn}</button>
           )}
-          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => markLevelComplete(4, navigate)}>
-            {ui.returnBtn}
-          </button>
+          <button className={isPerfect ? "btn btn-primary" : "btn btn-outline"} style={{ padding: '1.2rem', fontSize: '1.1rem', borderRadius: '30px' }} onClick={() => markLevelComplete(4, navigate)}>{ui.returnBtn}</button>
         </div>
       </div>
     );
@@ -544,29 +449,14 @@ const OtpSimulator = () => {
 
   return (
     <div className="module-page" style={{ height: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary, #020617)', padding: '2rem' }}>
-      {/* Header */}
       <header style={{ marginBottom: '2rem', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <button 
-            className="btn-link" 
-            onClick={() => {
-              if(step === 'quiz') setStep('hub');
-              else if(step === 'hub') setStep('intro');
-              else navigate('/banking');
-            }} 
-            style={{ background: 'none', border: 'none', color: '#94A3B8', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            <ArrowLeft size={24} /> Back
-          </button>
-          <h2 className="title-lg" style={{ margin: 0, color: '#F8FAFC', fontSize: '1.6rem' }}>{ui.title}</h2>
+          <button className="btn-link" onClick={() => { if(step === 'quiz') setStep('hub'); else if(step === 'hub') setStep('intro'); else navigate('/banking'); }} style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem', opacity: 0.8 }}><ArrowLeft size={24} /> Back</button>
+          <h2 className="title-lg" style={{ margin: 0, color: 'var(--text-primary)', fontSize: '1.6rem' }}>{ui.title}</h2>
         </div>
         <LanguageSelector />
       </header>
-
-      {/* Dynamic Content Area */}
-      <div style={{ flex: 1, minHeight: 0 }}>
-        {step === 'intro' ? renderIntro() : step === 'hub' ? renderHub() : step === 'quiz' ? renderQuiz() : renderFinal()}
-      </div>
+      <div style={{ flex: 1, minHeight: 0 }}>{step === 'intro' ? renderIntro() : step === 'hub' ? renderHub() : step === 'quiz' ? renderQuiz() : renderFinal()}</div>
     </div>
   );
 };
