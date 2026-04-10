@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { CreditCard, Smartphone, PhoneOff, Lock, ArrowLeft } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 
 const BankingSandbox = () => {
@@ -40,6 +41,14 @@ const BankingSandbox = () => {
       color: '#EF4444', // Red for Risk
       path: '/banking/otp',
       desc: t('moduleOTPDesc')
+    },
+    {
+      id: 'deepfake',
+      title: t('moduleDeepfake') || 'Deepfake KYC Scam',
+      icon: <LucideIcons.Video size={40} />,
+      color: '#8B5CF6', // Purple for AI/Cyber
+      path: '/banking/deepfake',
+      desc: t('moduleDeepfakeDesc') || 'Learn to identify and avoid AI voice & video deepfake traps.'
     }
   ];
 

@@ -12,6 +12,7 @@ import UpiSimulator from './pages/modules/UpiSimulator';
 import NetBankingSimulator from './pages/modules/NetBankingSimulator';
 import FraudSimulator from './pages/modules/FraudSimulator';
 import OtpSimulator from './pages/modules/OtpSimulator';
+import DeepfakeSimulator from './pages/modules/DeepfakeSimulator';
 import IdentitySafety from './pages/IdentitySafety';
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
           <Route path="/banking/netbanking" element={<NetBankingSimulator />} />
           <Route path="/banking/fraud" element={<FraudSimulator />} />
           <Route path="/banking/otp" element={<OtpSimulator />} />
+          <Route path="/banking/deepfake" element={<DeepfakeSimulator />} />
           <Route path="/identity" element={<IdentitySafety />} />
         </Routes>
       </Router>
