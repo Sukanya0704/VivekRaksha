@@ -255,3 +255,77 @@ a {
   animation: fadeIn 0.5s ease 0.2s forwards;
   opacity: 0;
 }
+
+/* Realistic Simulation Components */
+.browser-frame {
+  background: #f1f3f4;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dcdcdc;
+}
+
+.browser-header {
+  height: 48px;
+  background: #e1e3e6;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 12px;
+}
+
+.browser-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.control-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.url-bar {
+  flex: 1;
+  background: white;
+  height: 32px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 0.85rem;
+  color: #555;
+  border: 1px solid #ddd;
+}
+
+.simulated-window {
+  background: white;
+  min-height: 400px;
+  color: #333;
+}
+
+/* Social Media Specific */
+.social-sidebar {
+  width: 200px;
+  border-right: 1px solid #eee;
+  padding: 20px;
+}
+
+.social-nav-item {
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 5px;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.social-nav-item.active {
+  background: #e7f3ff;
+  color: #1877f2;
+}
+
+/* App Branding */
+.bank-brand { color: #004a99; font-weight: 800; }
+.hotel-brand { color: #ff5a5f; font-weight: 800; }

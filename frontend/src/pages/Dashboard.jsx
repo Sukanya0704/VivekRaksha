@@ -34,10 +34,7 @@ const Dashboard = () => {
 
   const handleMNCEntry = () => {
       setAnimatingTo('mnc');
-      setTimeout(() => {
-          alert(t('accessFacilityComingSoon'));
-          setAnimatingTo(null); // Reset after alert
-      }, 600);
+      setTimeout(() => navigate('/identity'), 600);
   };
 
   return (
@@ -135,8 +132,8 @@ const Dashboard = () => {
                 <p style={{ fontSize: '1rem', color: '#EAEAEA', opacity: 0.9, marginBottom: '2rem', flex: 1, zIndex: 2 }}>
                    {t('mncDesc')}
                 </p>
-                <button className="btn btn-outline" onClick={handleMNCEntry} style={{ width: '100%', zIndex: 2, padding: '14px 24px', fontSize: '1.1rem', background: 'rgba(255,255,255,0.1)' }}>
-                    {t('accessFacilityComingSoon')}
+                <button className="btn btn-primary" onClick={handleMNCEntry} style={{ width: '100%', zIndex: 2, padding: '14px 24px', fontSize: '1.1rem' }}>
+                    {t('enterFacility')}
                 </button>
             </div>
         </div>

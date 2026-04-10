@@ -8,8 +8,15 @@ export const useLanguage = () => useContext(LanguageContext);
 export const LanguageProvider = ({ children }) => {
   const [language, setLanguage] = useState('en'); // 'en', 'hi', 'mr'
 
-  const t = (key) => {
-    return translations[language][key] || translations['en'][key] || key;
+  const t = (key, params = {}) => {
+    let text = translations[language][key] || translations['en'][key] || key;
+    
+    // Simple interpolation for {variable}
+    Object.keys(params).forEach(param => {
+      text = text.replace(`{${param}}`, params[param]);
+    });
+    
+    return text;
   };
 
   const changeLanguage = (lang) => {
