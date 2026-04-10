@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { 
   ArrowLeft, 
   ShieldCheck, 
@@ -119,6 +120,7 @@ const InstructorGuide = ({ text, style = {}, arrow = 'left', onDismiss }) => {
 
 const IdentitySafety = () => {
   const { t } = useLanguage();
+  const { theme } = useTheme();
   const navigate = useNavigate();
 
   // module state: null (Menu), 1, 2, 3
@@ -304,23 +306,30 @@ const IdentitySafety = () => {
               style={{ flex: 1, display: 'grid', gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 0.75fr)', overflow: 'hidden' }}
             >
               {/* Action Zone */}
-              <section style={{ padding: '2.5rem', background: 'rgba(0,0,0,0.15)', overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--glass-border)' }}>
+              <section style={{ padding: '2.5rem', background: theme === 'light' ? 'rgba(0,0,0,0.03)' : 'rgba(0,0,0,0.15)', overflowY: 'auto', display: 'flex', flexDirection: 'column', borderRight: '1px solid var(--glass-border)' }}>
                 <div style={{ textAlign: 'center', marginBottom: '1.5rem', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px' }}>
                    <span style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2.5px', color: '#FF9F1C' }}>{t('actionZone')}</span>
                    <div style={{ background: '#FF9F1C22', color: '#FF9F1C', padding: '4px 12px', borderRadius: '20px', fontSize: '0.7rem', fontWeight: 700 }}>LIVE SIMULATION</div>
                 </div>
 
                 {/* WALKTHROUGH Placeholder - Repositioned to Action Zone */}
-                <div style={{ background: 'rgba(34, 197, 94, 0.1)', borderLeft: '4px solid #22c55e', padding: '1rem', borderRadius: '8px', marginBottom: '1.5rem' }}>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#22c55e', fontWeight: 800, fontSize: '0.8rem', marginBottom: '5px' }}>
+                <div style={{ 
+                  background: theme === 'light' ? 'rgba(21, 128, 61, 0.08)' : 'rgba(34, 197, 94, 0.12)', 
+                  borderLeft: '4px solid #16a34a', 
+                  padding: '1rem 1.25rem', 
+                  borderRadius: '10px', 
+                  marginBottom: '1.5rem',
+                  boxShadow: theme === 'light' ? '0 1px 4px rgba(21,128,61,0.08)' : 'none'
+                }}>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: theme === 'light' ? '#15803d' : '#22c55e', fontWeight: 800, fontSize: '0.8rem', marginBottom: '6px' }}>
                       <ArrowDown size={16} /> WALKTHROUGH
                    </div>
-                   <p style={{ fontSize: '0.95rem', margin: 0, fontWeight: 500 }}>
+                   <p style={{ fontSize: '0.95rem', margin: 0, fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.6 }}>
                       {activeModule === 1 && (
                         <span>
                            {t('lesson1Instruction')} 
                            <br />
-                           <span style={{ fontSize: '0.8rem', opacity: 0.8, color: '#22c55e' }}>{t('categoryPublicDesc')}</span>
+                           <span style={{ fontSize: '0.82rem', fontWeight: 400, color: theme === 'light' ? '#166534' : '#86efac', opacity: 0.9 }}>{t('categoryPublicDesc')}</span>
                         </span>
                       )}
                       {activeModule === 2 && "Drag the correct ID (Full or Masked) to the upload zones in both apps."}
@@ -586,13 +595,13 @@ const IdentitySafety = () => {
                    </AnimatePresence>
                 </div>
 
-                <div style={{ marginTop: 'auto', padding: '1.5rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                    <h5 style={{ margin: '0 0 1rem', fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase' }}>Lesson Status</h5>
+                <div style={{ marginTop: 'auto', padding: '1.5rem', background: theme === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)', borderRadius: '16px', border: '1px solid var(--glass-border)' }}>
+                    <h5 style={{ margin: '0 0 1rem', fontSize: '0.8rem', opacity: 0.6, textTransform: 'uppercase', color: 'var(--text-primary)' }}>Lesson Status</h5>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                        {[1, 2, 3].map(id => (
                          <div key={id} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9rem' }}>
-                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: activeModule === id ? '#FF9F1C' : 'rgba(255,255,255,0.1)' }}></div>
-                            <span style={{ opacity: activeModule === id ? 1 : 0.5 }}>Lesson {id}</span>
+                            <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: activeModule === id ? '#FF9F1C' : (theme === 'light' ? 'rgba(0,0,0,0.15)' : 'rgba(255,255,255,0.1)') }}></div>
+                            <span style={{ opacity: activeModule === id ? 1 : 0.5, color: 'var(--text-primary)' }}>Lesson {id}</span>
                          </div>
                        ))}
                     </div>
