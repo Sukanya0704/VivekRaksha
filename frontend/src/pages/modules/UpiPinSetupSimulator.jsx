@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { getUnifiedVoice } from '../../utils/audio';
 import * as LucideIcons from 'lucide-react';
 
 const { 
@@ -20,39 +21,63 @@ const TRANSLATIONS = {
     complete: 'Tutorial Complete!'
   },
   hi: {
-    pin_setup_dash: 'प्रक्रिया शुरू करने के लिए "Add Bank Account" पर क्लिक करें।',
-    pin_setup_select_bank: 'सूची से अपना बैंक चुनें।',
-    pin_setup_method: 'अपने डेबिट कार्ड या आधार नंबर का उपयोग करके सत्यापित करना चुनें।',
-    pin_setup_details: 'आगे बढ़ने के लिए आवश्यक विवरण सही ढंग से दर्ज करें।',
-    pin_setup_otp: 'अपना 6-अंकों का OTP दर्ज करें, फिर चेकमार्क पर क्लिक करें।',
-    pin_setup_new_pin: 'अपना नया 4-अंकों का UPI पिन सेट करें।',
-    pin_setup_confirm_pin: 'पुष्टि करने के लिए अपना यूपीआई पिन दोबारा दर्ज करें।',
-    pin_setup_success: 'सक्सेस स्क्रीन की जाँच करें, और Done पर क्लिक करें।',
-    complete: 'ट्यूटोरियल पूरा हुआ!'
+    pin_setup_dash: 'प्रक्रिया शुरू करने के लिए बँक खाते जोड़ने वाले विकल्प पर क्लिक करें।',
+    pin_setup_select_bank: 'सूची से अपना बैंक चुनें (जैसे भारतीय स्टेट बैंक)।',
+    pin_setup_method: 'सत्यापित करने के लिए डेबिट कार्ड या आधार का उपयोग करना चुनें।',
+    pin_setup_details: 'आगे बढ़ने के लिए आवश्यक जानकारी सही ढंग से भरें।',
+    pin_setup_otp: 'अपने मोबाइल पर भेजा गया ६-अंकों का ओटीपी डालें, फिर सही के निशान पर क्लिक करें।',
+    pin_setup_new_pin: 'एक नया और सुरक्षित ४-अंकों का यूपीआई पिन बनाएं। १२३४ जैसे आसान पिन से बचें।',
+    pin_setup_confirm_pin: 'पुष्टि करने के लिए अपना ४-अंकों का यूपीआई पिन दोबारा डालें।',
+    pin_setup_success: 'सफलता की जानकारी जांचें, और फिर पूर्ण बटन दबाएं।',
+    complete: 'प्रशिक्षण पूरा हुआ!'
   },
   mr: {
-    pin_setup_dash: 'सेटअप प्रक्रिया सुरू करण्यासाठी "Add Bank Account" वर क्लिक करा.',
-    pin_setup_select_bank: 'यादीतून तुमची बँक निवडा.',
-    pin_setup_method: 'डेबिट कार्ड किंवा आधार वापरून पडताळणी करण्याची पद्धत निवडा.',
-    pin_setup_details: 'पुढे जाण्यासाठी आवश्यक तपशील योग्यरित्या प्रविष्ट करा.',
-    pin_setup_otp: '6-अंकी OTP टाका आणि चेकमार्कवर क्लिक करा.',
-    pin_setup_new_pin: 'तुमचा नवीन 4-अंकी UPI पिन सेट करा.',
-    pin_setup_confirm_pin: 'खात्री करण्यासाठी तुमचा UPI पिन पुन्हा टाका.',
-    pin_setup_success: 'सक्सेस स्क्रीन तपासा आणि Done वर क्लिक करा.',
-    complete: 'ट्युटोरियल पूर्ण झाले!'
+    pin_setup_dash: 'प्रक्रिया सुरू करण्यासाठी बँक खाते जोडण्याच्या पर्यायावर क्लिक करा.',
+    pin_setup_select_bank: 'यादीतून तुमची बँक निवडा (उदा. स्टेट बँक ऑफ इंडिया).',
+    pin_setup_method: 'पडताळणी करण्यासाठी डेबिट कार्ड किंवा आधार निवडण्याचे ठरवा.',
+    pin_setup_details: 'पुढे जाण्यासाठी आवश्यक माहिती अचूकपणे भरा.',
+    pin_setup_otp: 'तुमच्या मोबाईलवर आलेला ६-अंकी ओटीपी टाका, त्यानंतर बरोबरच्या खुणेवर क्लिक करा.',
+    pin_setup_new_pin: 'नवा आणि सुरक्षित ४-अंकी यूपीआय पिन तयार करा. १२३४ सारखे सोपे पिन टाळा.',
+    pin_setup_confirm_pin: 'खात्री करण्यासाठी तुमचा ४-अंकी यूपीआय पिन पुन्हा टाका.',
+    pin_setup_success: 'यशस्वी झाल्याची माहिती तपासा आणि त्यानंतर पूर्ण बटण दाबा.',
+    complete: 'प्रशिक्षण पूर्ण झाले!'
   }
 };
 
 const KNOWLEDGE_BASE = {
-  pin_setup_dash: "To use UPI, you must link your bank account to the app.",
-  pin_setup_select_bank: "The app uses your phone number to securely find matching bank accounts.",
-  pin_setup_method: "Aadhaar verification is a highly requested standard for users who don't have a physical Debit Card but have linked their Aadhaar to the Bank.",
-  pin_setup_details: "Never share your debit card or Aadhaar details with anyone. The app needs this only ONCE to verify your true identity over encrypted channels.",
-  pin_setup_otp: "The OTP proves you have the phone linked to the bank account. If using Aadhaar, two OTPs are typically required (UIDAI & Bank), but apps often auto-detect them. NEVER share an OTP.",
-  pin_setup_new_pin: "This is your secret key to authorize payments. Choose a strong PIN, avoid easy ones like '1234' or your birth year.",
-  pin_setup_confirm_pin: "Confirming limits typing mistakes that could permanently lock you out.",
-  pin_setup_success: "Your UPI ID is now active! You can send and receive payments seamlessly.",
-  complete: "You are now equipped with safe habits for UPI PIN setup!"
+  en: {
+    pin_setup_dash: "To use UPI, you must link your bank account to the app.",
+    pin_setup_select_bank: "The app uses your phone number to securely find matching bank accounts.",
+    pin_setup_method: "Aadhaar verification is a highly requested standard for users who don't have a physical Debit Card but have linked their Aadhaar to the Bank.",
+    pin_setup_details: "Never share your debit card or Aadhaar details with anyone. The app needs this only ONCE to verify your true identity over encrypted channels.",
+    pin_setup_otp: "The OTP proves you have the phone linked to the bank account. If using Aadhaar, two OTPs are typically required (UIDAI & Bank), but apps often auto-detect them. NEVER share an OTP.",
+    pin_setup_new_pin: "This is your secret key to authorize payments. Choose a strong PIN, avoid easy ones like '1234' or your birth year.",
+    pin_setup_confirm_pin: "Confirming limits typing mistakes that could permanently lock you out.",
+    pin_setup_success: "Your UPI ID is now active! You can send and receive payments seamlessly.",
+    complete: "You are now equipped with safe habits for UPI PIN setup!"
+  },
+  hi: {
+    pin_setup_dash: "यूपीआई का उपयोग करने के लिए, आपको अपने बैंक खाते को ऐप से जोड़ना होगा।",
+    pin_setup_select_bank: "ऐप आपके फोन नंबर का उपयोग करके सुरक्षित रूप से आपके बैंक खातों को ढूंढता है।",
+    pin_setup_method: "आधार सत्यापन उन उपयोगकर्ताओं के लिए बहुत उपयोगी है जिनके पास डेबिट कार्ड नहीं है लेकिन आधार बैंक खाते से जुड़ा है।",
+    pin_setup_details: "अपना डेबिट कार्ड या आधार विवरण किसी के साथ साझा न करें। आपकी पहचान जांचने के लिए ऐप को इसकी केवल एक बार आवश्यकता होती है।",
+    pin_setup_otp: "ओटीपी यह साबित करता है कि आपके पास फोन है जो बैंक से जुड़ा है। आधार उपयोग करने पर अक्सर दो ओटीपी की आवश्यकता होती है। ओटीपी कभी साक्षा न करें।",
+    pin_setup_new_pin: "यह भुगतान करने के लिए आपकी गुप्त कुंजी है। एक मजबूत पिन चुनें। '१२३४' या अपने जन्म के वर्ष जैसे आसान पिन से बचें।",
+    pin_setup_confirm_pin: "पुष्टि करने से टाइपिंग की गलतियां बचती हैं, जो आपको हमेशा के लिए ऐप के बाहर कर सकती हैं।",
+    pin_setup_success: "आपकी यूपीआई आईडी अब सक्रिय है! अब आप आसानी से पैसे भेज और प्राप्त कर सकते हैं।",
+    complete: "अब आप यूपीआई पिन बनाने के सुरक्षित तरीकों से पूरी तरह परिचित हैं!"
+  },
+  mr: {
+    pin_setup_dash: "यूपीआय वापरण्यासाठी, तुम्हाला तुमचे बँक खाते अॅपशी जोडावे लागेल.",
+    pin_setup_select_bank: "अॅप तुमच्या फोन नंबरचा वापर करून सुरक्षितपणे तुमचे बँक खाते शोधते.",
+    pin_setup_method: "आधार पडताळणी अशा वापरकर्त्यांसाठी खूप उपयुक्त आहे ज्यांच्याकडे डेबिट कार्ड नाही परंतु आधार बँकेशी जोडलेले आहे.",
+    pin_setup_details: "तुमचे डेबिट कार्ड किंवा आधारची माहिती कोणाशीही शेअर करू नका. ओळख पटवण्यासाठी अॅपला त्याची फक्त एकदाच आवश्यकता असते.",
+    pin_setup_otp: "ओटीपी हे सिद्ध करतो की तुमच्याकडे बँक खात्याशी जोडलेला फोन आहे. आधार कार्ड वापरताना सहसा दोन ओटीपी लागतात. ओटीपी कधीही कोणाला सांगू नका.",
+    pin_setup_new_pin: "पैसे पाठवण्यासाठी ही तुमची गुप्त चावी आहे. नेहमी मजबूत पिन निवडा. '१२३४' किंवा तुमच्या जन्माचे वर्ष यासारखे सोपे पिन टाळा.",
+    pin_setup_confirm_pin: "पुन्हा खात्री केल्यामुळे टायपिंगच्या चुका टळतात, ज्या तुम्हाला कायमचे अॅपच्या बाहेर करू शकतात.",
+    pin_setup_success: "तुमचा युपीआय आयडी आता सक्रिय आहे! आता तुम्ही सहजपणे पैसे पाठवू आणि मिळवू शकता.",
+    complete: "आता तुम्ही यूपीआय पिन सेट करण्याच्या सुरक्षित पद्धतींबद्दल सर्व माहिती मिळवली आहे!"
+  }
 };
 
 const STEPS_SEQ = [
@@ -67,7 +92,7 @@ const STEPS_SEQ = [
   'complete'
 ];
 
-const OutsideTooltip = ({ stepId, text }) => {
+const OutsideTooltip = ({ stepId, text, language }) => {
     const [pos, setPos] = useState(null);
 
     useEffect(() => {
@@ -127,7 +152,7 @@ const OutsideTooltip = ({ stepId, text }) => {
             pointerEvents: 'none'
         }}>
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', color: '#bbf7d0' }}>
-               <span>🎓</span> Instructor Guide
+               <span>🎓</span> {language === 'hi' ? 'शिक्षक मार्गदर्शक' : language === 'mr' ? 'मार्गदर्शक' : 'Instructor Guide'}
             </div>
             <div style={{ fontSize: '15px', lineHeight: '1.4', textAlign: 'left', fontWeight: '600' }}>{text}</div>
             
@@ -188,6 +213,8 @@ const UpiPinSetupSimulator = ({ language: languageProp }) => {
     const runSpeak = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      const unifiedVoice = getUnifiedVoice();
+      if (unifiedVoice) utterance.voice = unifiedVoice;
       const langMap = { en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN' };
       utterance.lang = langMap[language] || 'en-IN';
       window.speechSynthesis.speak(utterance);
@@ -334,7 +361,7 @@ const UpiPinSetupSimulator = ({ language: languageProp }) => {
         </div>
 
         {/* Outward Walkthrough Tooltip */}
-        <OutsideTooltip stepId={currentStepId} text={instructionText} />
+        <OutsideTooltip stepId={currentStepId} text={instructionText} language={language} />
 
         {/* Centered Smartphone Mockup */}
         <div id="smartphone-frame" style={{ width: '100%', maxWidth: '380px', height: '90vh', maxHeight: '760px', background: 'white', borderRadius: '48px', padding: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), inset 0 0 0 8px #1a1a1a', position: 'relative', overflow: 'hidden', marginTop: '40px' }}>
@@ -703,10 +730,10 @@ const UpiPinSetupSimulator = ({ language: languageProp }) => {
             <div style={{ position: 'fixed', top: '50%', right: '40px', transform: 'translateY(-50%)', width: '420px', zIndex: 50 }}>
                 <div style={{ background: 'white', padding: '32px', borderRadius: '24px', borderLeft: '12px solid #5f259f', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)' }}>
                     <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#5f259f', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '28px' }}>💡</span> Did You Know?
+                        <span style={{ fontSize: '28px' }}>💡</span> {language === 'hi' ? 'क्या आप जानते हैं?' : language === 'mr' ? 'तुम्हाला माहित आहे का?' : 'Did You Know?'}
                     </h2>
                     <div key={currentStepId} style={{ animation: 'fadeContent 0.5s', fontSize: '18px', color: '#334155', lineHeight: '1.6', fontWeight: '600' }}>
-                        {KNOWLEDGE_BASE[currentStepId] || "Follow the guided instructions."}
+                        {(KNOWLEDGE_BASE[language] && KNOWLEDGE_BASE[language][currentStepId]) || KNOWLEDGE_BASE['en'][currentStepId] || "Follow the guided instructions."}
                     </div>
                 </div>
             </div>

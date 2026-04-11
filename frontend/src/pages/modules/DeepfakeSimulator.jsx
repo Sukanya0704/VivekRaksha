@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../../context/LanguageContext';
+import { getUnifiedVoice } from '../../utils/audio';
 import * as LucideIcons from 'lucide-react';
 
 const { 
@@ -16,27 +17,43 @@ const TRANSLATIONS = {
     complete: 'Tutorial Complete!'
   },
   hi: {
-    step_sms: 'यह देखने के लिए कि क्या होता है, SMS सूचना पर क्लिक करें।',
-    step_incoming_call: 'कॉल का उत्तर देने के लिए हरे रंग के "Accept" बटन पर क्लिक करें।',
-    step_video_call: 'आवाज़ को सुनें और वीडियो के ग्लिच (गड़बड़ियों) पर ध्यान दें। इसका विश्लेषण करने के लिए स्कैमर के वीडियो फ़ीड पर क्लिक करें।',
-    step_disconnect: 'स्कैमर से कभी बहस न करें। तुरंत डिस्कनेक्ट करने के लिए लाल फोन बटन पर क्लिक करें।',
-    complete: 'ट्यूटोरियल पूरा हुआ!'
+    step_sms: 'क्या होता है यह देखने के लिए संदेश (एसएमएस) पर क्लिक करें।',
+    step_incoming_call: 'कॉल उठाने के लिए हरे बटन पर क्लिक करें।',
+    step_video_call: 'आवाज़ को ध्यान से सुनें और वीडियो में होने वाली गड़बड़ियों को देखें। जांच करने के लिए ठग के वीडियो पर क्लिक करें।',
+    step_disconnect: 'ठग से कभी बहस न करें। तुरंत कॉल काटने के लिए लाल फोन बटन पर क्लिक करें।',
+    complete: 'प्रशिक्षण पूरा हुआ!'
   },
   mr: {
-    step_sms: 'काय होते ते पाहण्यासाठी SMS सूचनेवर क्लिक करा.',
-    step_incoming_call: 'कॉलला उत्तर देण्यासाठी हिरव्या "Accept" बटणावर क्लिक करा.',
-    step_video_call: 'आवाज ऐका आणि व्हिडिओमधील त्रुटींकडे लक्ष द्या. विश्लेषण करण्यासाठी स्कॅमरच्या व्हिडिओ फीडवर क्लिक करा.',
-    step_disconnect: 'स्कॅमरशी कधीही वाद घालू नका. त्वरित डिस्कनेक्ट करण्यासाठी लाल फोन बटणावर क्लिक करा.',
-    complete: 'ट्युटोरियल पूर्ण झाले!'
+    step_sms: 'काय होते ते पाहण्यासाठी संदेशावर (एसएमएस) क्लिक करा.',
+    step_incoming_call: 'कॉल उचलण्यासाठी हिरव्या बटणावर क्लिक करा.',
+    step_video_call: 'आवाज लक्षपूर्वक ऐका आणि व्हिडिओमधील त्रुटींकडे लक्ष द्या. तपासणी करण्यासाठी फसवणूक करणाऱ्याच्या व्हिडिओवर क्लिक करा.',
+    step_disconnect: 'फसवणूक करणाऱ्याशी कधीही वाद घालू नका. त्वरित कॉल कापण्यासाठी लाल फोन बटणावर क्लिक करा.',
+    complete: 'प्रशिक्षण पूर्ण झाले!'
   }
 };
 
 const KNOWLEDGE_BASE = {
-  step_sms: "Scammers use URGENCY to make you panic. Real banks will never threaten to freeze your account in 2 hours via SMS.",
-  step_incoming_call: "Scammers use official-sounding names and logos (like Police or RBI) to intimidate you into obeying them.",
-  step_video_call: "Deepfakes often have glitches: the lip movement doesn't match the audio, the voice sounds robotic, and they NEVER blink naturally.",
-  step_disconnect: "If an 'official' asks for an OTP, money, or threatens you with arrest on a video call, it is 100% a scam. HANG UP.",
-  complete: "Great job! If you are ever unsure, hang up and dial the bank's official customer care number yourself."
+  en: {
+    step_sms: "Scammers use URGENCY to make you panic. Real banks will never threaten to freeze your account in 2 hours via SMS.",
+    step_incoming_call: "Scammers use official-sounding names and logos (like Police or RBI) to intimidate you into obeying them.",
+    step_video_call: "Deepfakes often have glitches: the lip movement doesn't match the audio, the voice sounds robotic, and they NEVER blink naturally.",
+    step_disconnect: "If an 'official' asks for an OTP, money, or threatens you with arrest on a video call, it is 100% a scam. HANG UP.",
+    complete: "Great job! If you are ever unsure, hang up and dial the bank's official customer care number yourself."
+  },
+  hi: {
+    step_sms: "ठग आपको घबराने के लिए जल्दबाजी का नाटक करते हैं। असली बैंक कभी भी संदेश भेजकर आपका खाता दो घंटे में बंद करने की धमकी नहीं देते।",
+    step_incoming_call: "ठग आपको डराने और अपनी बात मनवाने के लिए पुलिस या रिज़र्व बैंक जैसे आधिकारिक नामों और लोगो का उपयोग करते हैं।",
+    step_video_call: "नकली (डीपफेक) वीडियो में अक्सर गड़बड़ियां होती हैं: होंठों की हरकत आवाज़ से मेल नहीं खाती, आवाज़ मशीन जैसी लगती है, और वे कभी भी स्वाभाविक रूप से पलकें नहीं झपकाते।",
+    step_disconnect: "यदि कोई 'अधिकारी' वीडियो कॉल पर आपसे ओटीपी, पैसे मांगता है, या गिरफ्तारी की धमकी देता है, तो यह पूरी तरह से एक धोखा है। तुरंत फोन काट दें।",
+    complete: "बहुत बढ़िया! यदि आपको कभी भी संदेह हो, तो फोन काट दें और खुद बैंक के आधिकारिक ग्राहक सेवा नंबर पर कॉल करें।"
+  },
+  mr: {
+    step_sms: "फसवणूक करणारे तुम्हाला घाबरवण्यासाठी घाई असल्याचे भासवतात. खऱ्या बँका कधीही संदेश पाठवून तुमचे खाते दोन तासांत बंद करण्याची धमकी देत नाहीत.",
+    step_incoming_call: "फसवणूक करणारे तुम्हाला घाबरवण्यासाठी आणि त्यांचे म्हणणे ऐकायला लावण्यासाठी पोलीस किंवा रिझर्व्ह बँक यांसारख्या अधिकृत नावांचा आणि लोगोचा वापर करतात.",
+    step_video_call: "बनावट (डीपफेक) व्हिडिओमध्ये अनेकदा त्रुटी असतात: ओठांच्या हालचाली आवाजाशी जुळत नाहीत, आवाज यंत्रासारखा वाटतो आणि ते कधीही नैसर्गिकरित्या पापण्या मिटत नाहीत.",
+    step_disconnect: "जर एखादा 'अधिकारी' व्हिडिओ कॉलवर तुमच्याकडून ओटीपी, पैसे मागत असेल किंवा अटकेची धमकी देत असेल, तर ती १००% फसवणूक आहे. त्वरित फोन कट करा.",
+    complete: "उत्तम! जर तुम्हाला कधीही शंका वाटली, तर फोन कट करा आणि स्वतः बँकेच्या अधिकृत ग्राहक सेवा क्रमांकावर कॉल करा."
+  }
 };
 
 const STEPS_SEQ = [
@@ -47,7 +64,7 @@ const STEPS_SEQ = [
   'complete'
 ];
 
-const OutsideTooltip = ({ stepId, text }) => {
+const OutsideTooltip = ({ stepId, text, language }) => {
     const [pos, setPos] = useState(null);
 
     useEffect(() => {
@@ -107,7 +124,7 @@ const OutsideTooltip = ({ stepId, text }) => {
             pointerEvents: 'none'
         }}>
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', color: '#bbf7d0' }}>
-               <span>🎓</span> Instructor Guide
+               <span>🎓</span> {language === 'hi' ? 'शिक्षक मार्गदर्शक' : language === 'mr' ? 'मार्गदर्शक' : 'Instructor Guide'}
             </div>
             <div style={{ fontSize: '15px', lineHeight: '1.4', textAlign: 'left', fontWeight: '600' }}>{text}</div>
             
@@ -180,6 +197,8 @@ const DeepfakeSimulator = ({ language: languageProp }) => {
       if (scammerPlaying) return;
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      const unifiedVoice = getUnifiedVoice();
+      if (unifiedVoice) utterance.voice = unifiedVoice;
       const langMap = { en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN' };
       utterance.lang = langMap[language] || 'en-IN';
       window.speechSynthesis.speak(utterance);
@@ -189,6 +208,8 @@ const DeepfakeSimulator = ({ language: languageProp }) => {
        scammerPlaying = true;
        window.speechSynthesis.cancel();
        const scammer = new SpeechSynthesisUtterance("You are under digital arrest. Do not disconnect. Give me the OTP sent to your phone.");
+       const unifiedVoice = getUnifiedVoice();
+       if (unifiedVoice) scammer.voice = unifiedVoice;
        scammer.pitch = 0.4;
        scammer.rate = 0.8;
        scammer.onend = () => {
@@ -257,7 +278,7 @@ const DeepfakeSimulator = ({ language: languageProp }) => {
         </div>
 
         {/* Outward Walkthrough Tooltip */}
-        <OutsideTooltip stepId={currentStepId} text={instructionText} />
+        <OutsideTooltip stepId={currentStepId} text={instructionText} language={language} />
 
         {/* Centered Smartphone Mockup */}
         <div id="smartphone-frame" style={{ width: '100%', maxWidth: '380px', height: '90vh', maxHeight: '760px', background: 'black', borderRadius: '48px', padding: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), inset 0 0 0 8px #1a1a1a', position: 'relative', overflow: 'hidden', marginTop: '40px' }}>
@@ -422,10 +443,10 @@ const DeepfakeSimulator = ({ language: languageProp }) => {
             <div style={{ position: 'fixed', top: '50%', right: '40px', transform: 'translateY(-50%)', width: '420px', zIndex: 50 }}>
                 <div style={{ background: 'white', padding: '32px', borderRadius: '24px', borderLeft: '12px solid #5f259f', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)' }}>
                     <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#5f259f', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '28px' }}>💡</span> Did You Know?
+                        <span style={{ fontSize: '28px' }}>💡</span> {language === 'hi' ? 'क्या आप जानते हैं?' : language === 'mr' ? 'तुम्हाला माहित आहे का?' : 'Did You Know?'}
                     </h2>
                     <div key={currentStepId} style={{ animation: 'fadeContent 0.5s', fontSize: '18px', color: '#334155', lineHeight: '1.6', fontWeight: '600' }}>
-                        {KNOWLEDGE_BASE[currentStepId] || "Follow the guided instructions."}
+                        {(KNOWLEDGE_BASE[language] && KNOWLEDGE_BASE[language][currentStepId]) || KNOWLEDGE_BASE['en'][currentStepId] || "Follow the guided instructions."}
                     </div>
                 </div>
             </div>

@@ -165,10 +165,6 @@ export const translations = {
     bankDesc: 'Learn UPI, Net Banking, and Scams in a completely secure environment.',
     mncDesc: 'Identify Government IDs & navigate Civic Safety modules.',
     securityDisclaimer: 'Security Disclaimer',
-    safetyTips: 'Essential Safety Tips',
-    tip1: 'Always verify the website URL before entering your PIN.',
-    tip2: 'Banks never ask for your password over a phone call.',
-    tip3: 'Never click on suspicious links sent via SMS or email.',
 
     // Banking Sandbox
     selectModule: 'Select a Learning Module',

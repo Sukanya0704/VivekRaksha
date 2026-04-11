@@ -4,6 +4,7 @@ import { useLanguage } from '../../context/LanguageContext';
 import * as LucideIcons from 'lucide-react';
 import { markLevelComplete } from '../../utils/levelProgress';
 import LanguageSelector from '../../components/LanguageSelector';
+import { getUnifiedVoice } from '../../utils/audio';
 
 const { 
   ArrowLeft, CheckCircle, Smartphone, Building2, User, History, Search
@@ -22,39 +23,63 @@ const TRANSLATIONS = {
     complete: 'Tutorial Complete!'
   },
   hi: {
-    upi_dash_mobile: '"To Mobile" पर क्लिक करें।',
-    upi_mobile_select: 'सर्च बॉक्स में 10-अंकों का नंबर टाइप करें या कोई कॉन्टैक्ट चुनें।',
-    upi_mobile_amount: 'जितनी राशि भेजनी है, उसे दर्ज करें और Pay पर क्लिक करें।',
-    upi_mobile_pin: 'अपना 4-अंकों का पिन दर्ज करें।',
-    upi_mobile_success: 'सक्सेस स्क्रीन की जाँच करें, और Done पर क्लिक करें।',
-    upi_dash_balance: '"Check Balance" पर क्लिक करें।',
-    upi_balance_pin: 'अपना पिन दर्ज करें।',
-    upi_balance_success: 'अपना बैलेंस जांचें और Done पर क्लिक करें।',
-    complete: 'ट्यूटोरियल पूरा हुआ!'
+    upi_dash_mobile: '"टू मोबाइल" बटन दबाएं।',
+    upi_mobile_select: 'खोज बॉक्स में दस अंकों का फोन नंबर लिखें या कोई संपर्क चुनें।',
+    upi_mobile_amount: 'जितनी राशि भेजनी है, उसे लिखें और "पे" बटन दबाएं।',
+    upi_mobile_pin: 'अपना चार अंकों का गुप्त कोड (पिन) डालें।',
+    upi_mobile_success: 'भुगतान सफल होने की जानकारी जांचें, और "डन" बटन दबाएं।',
+    upi_dash_balance: '"चेक बैलेंस" बटन दबाएं।',
+    upi_balance_pin: 'अपना गुप्त कोड (पिन) डालें।',
+    upi_balance_success: 'अपना बैलेंस जांचें और "डन" बटन दबाएं।',
+    complete: 'प्रशिक्षण पूरा हुआ!'
   },
   mr: {
-    upi_dash_mobile: '"To Mobile" वर क्लिक करा.',
-    upi_mobile_select: 'शोध बॉक्समध्ये 10-अंकी मोबाइल नंबर टाइप करा किंवा संपर्क निवडा.',
-    upi_mobile_amount: 'रक्कम टाइप करून Pay वर क्लिक करा.',
-    upi_mobile_pin: 'तुमचा 4-अंकी UPI पिन टाका.',
-    upi_mobile_success: 'सक्सेस स्क्रीन तपासा आणि Done वर क्लिक करा.',
-    upi_dash_balance: '"Check Balance" वर क्लिक करा.',
-    upi_balance_pin: 'तुमचा पिन टाका.',
-    upi_balance_success: 'बॅलन्स तपासा आणि Done वर क्लिक करा.',
-    complete: 'ट्युटोरियल पूर्ण झाले!'
+    upi_dash_mobile: '"टू मोबाइल" बटण दाबा.',
+    upi_mobile_select: 'शोध बॉक्समध्ये दहा अंकी मोबाईल नंबर लिहा किंवा कोणताही संपर्क निवडा.',
+    upi_mobile_amount: 'तुम्हाला पाठवायची असलेली रक्कम लिहा आणि "पे" बटण दाबा.',
+    upi_mobile_pin: 'तुमचा चार अंकी गुप्त कोड (पिन) टाका.',
+    upi_mobile_success: 'पेमेंट यशस्वी झाल्याची माहिती तपासा आणि "डन" बटण दाबा.',
+    upi_dash_balance: '"चेक बॅलन्स" बटण दाबा.',
+    upi_balance_pin: 'तुमचा गुप्त कोड (पिन) टाका.',
+    upi_balance_success: 'तुमचे बॅलन्स तपासा आणि "डन" बटण दाबा.',
+    complete: 'प्रशिक्षण पूर्ण झाले!'
   }
 };
 
 const KNOWLEDGE_BASE = {
-  upi_dash_mobile: "UPI uses virtual IDs so you don't have to share your sensitive bank account number.",
-  upi_mobile_select: "Scammers often use numbers that look familiar. Always verify the name that pops up before paying!",
-  upi_mobile_amount: "Count the zeros! ₹299 vs ₹2990 is a big difference, and UPI transfers are instant and hard to reverse.",
-  upi_mobile_pin: "🚨 CRITICAL: NEVER enter your PIN to receive money. You only use a PIN to SEND money or check your balance.",
-  upi_mobile_success: "Always take a screenshot of the success screen or note the Reference ID for your records.",
-  upi_dash_balance: "Checking your balance connects directly to your secure bank servers, which is why it requires a PIN.",
-  upi_balance_pin: "🚨 CRITICAL: NEVER share your UPI PIN. It is your final secret key.",
-  upi_balance_success: "Checking your balance directly within the banking module is the only safe way to verify.",
-  complete: "You are now equipped with safe habits for UPI payments!"
+  en: {
+    upi_dash_mobile: "UPI uses virtual IDs so you don't have to share your sensitive bank account number.",
+    upi_mobile_select: "Scammers often use numbers that look familiar. Always verify the name that pops up before paying!",
+    upi_mobile_amount: "Count the zeros! ₹299 vs ₹2990 is a big difference, and UPI transfers are instant and hard to reverse.",
+    upi_mobile_pin: "🚨 CRITICAL: NEVER enter your PIN to receive money. You only use a PIN to SEND money or check your balance.",
+    upi_mobile_success: "Always take a screenshot of the success screen or note the Reference ID for your records.",
+    upi_dash_balance: "Checking your balance connects directly to your secure bank servers, which is why it requires a PIN.",
+    upi_balance_pin: "🚨 CRITICAL: NEVER share your UPI PIN. It is your final secret key.",
+    upi_balance_success: "Checking your balance directly within the banking module is the only safe way to verify.",
+    complete: "You are now equipped with safe habits for UPI payments!"
+  },
+  hi: {
+    upi_dash_mobile: "यूपीआई आभासी पहचान (वर्चुअल आईडी) का उपयोग करता है, जिससे आपको अपना बैंक खाता नंबर साझा करने की आवश्यकता नहीं होती।",
+    upi_mobile_select: "जालसाज़ अक्सर ऐसे नंबर का उपयोग करते हैं जो जाने-पहचाने लगते हैं। पैसे भेजने से पहले हमेशा प्राप्तकर्ता के नाम की जांच करें!",
+    upi_mobile_amount: "शून्यों की गिनती करें! ₹२९९ और ₹२९९० में बड़ा अंतर है, और यूपीआई भुगतान तुरंत होते हैं जिन्हें वापस करना मुश्किल है।",
+    upi_mobile_pin: "🚨 अत्यंत महत्वपूर्ण: पैसे प्राप्त करने के लिए कभी भी अपना पिन न डालें। पिन का उपयोग केवल पैसे भेजने या बैलेंस जांचने के लिए किया जाता है।",
+    upi_mobile_success: "अपने रिकॉर्ड के लिए हमेशा सफलता स्क्रीन का स्क्रीनशॉट लें या संदर्भ संख्या (रेफरेंस आईडी) लिखकर रखें।",
+    upi_dash_balance: "यह आपके सुरक्षित बैंक सर्वर से सीधे जुड़ता है, इसीलिए इसके लिए पिन की आवश्यकता होती है।",
+    upi_balance_pin: "🚨 अत्यंत महत्वपूर्ण: अपना यूपीआई पिन कभी भी किसी के साथ साझा न करें। यह आपकी अंतिम गुप्त कुंजी है।",
+    upi_balance_success: "बैंकिंग अनुभाग के अंदर सीधे अपना बैलेंस जांचना ही सत्यापन का एकमात्र सुरक्षित तरीका है।",
+    complete: "अब आप यूपीआई भुगतान के सुरक्षित तरीकों से पूरी तरह परिचित हैं!"
+  },
+  mr: {
+    upi_dash_mobile: "यूपीआय आभासी ओळख (व्हर्च्युअल आयडी) वापरते, त्यामुळे तुम्हाला तुमचा बँक खाते क्रमांक शेअर करण्याची गरज नाही.",
+    upi_mobile_select: "फसवणूक करणारे अनेकदा ओळखीचे वाटणारे नंबर वापरतात. पैसे पाठवण्यापूर्वी नेहमी समोरच्या नावाची खात्री करा!",
+    upi_mobile_amount: "शून्यांची संख्या मोजा! ₹२९९ आणि ₹२९९० मध्ये मोठा फरक आहे, आणि यूपीआय पेमेंट त्वरित होतात जे परत मिळवणे कठीण असते.",
+    upi_mobile_pin: "🚨 अत्यंत महत्त्वाचे: पैसे मिळवण्यासाठी तुमचा पिन कधीही टाकू नका. पिनचा वापर केवळ पैसे पाठवण्यासाठी किंवा बॅलन्स तपासण्यासाठी होतो.",
+    upi_mobile_success: "भविष्यासाठी नेहमी यशस्वी स्क्रीनचा स्क्रीनशॉट घ्या किंवा संदर्भ क्रमांक (रेफरन्स आयडी) लिहून ठेवा.",
+    upi_dash_balance: "बॅलन्स तपासण्यासाठी थेट सुरक्षित बँक सर्व्हरशी जोडणी होते, म्हणूनच त्यासाठी पिन आवश्यक असतो.",
+    upi_balance_pin: "🚨 अत्यंत महत्त्वाचे: तुमचा यूपीआय पिन कधीही शेअर करू नका. ती तुमची अंतिम गुप्त चावी आहे.",
+    upi_balance_success: "बँकिंग विभागात थेट बॅलन्स तपासणे हाच योग्य आणि सुरक्षित मार्ग आहे.",
+    complete: "आता तुम्ही युपीआय पेमेंटच्या सुरक्षित पद्धतींबद्दल सर्व माहिती मिळवली आहे!"
+  }
 };
 
 const STEPS_SEQ = [
@@ -69,7 +94,7 @@ const STEPS_SEQ = [
   'complete'
 ];
 
-const OutsideTooltip = ({ stepId, text }) => {
+const OutsideTooltip = ({ stepId, text, language }) => {
     const [pos, setPos] = useState(null);
 
     useEffect(() => {
@@ -131,7 +156,7 @@ const OutsideTooltip = ({ stepId, text }) => {
             pointerEvents: 'none'
         }}>
             <div style={{ fontWeight: 'bold', fontSize: '13px', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', color: '#bbf7d0' }}>
-               <span>🎓</span> Instructor Guide
+               <span>🎓</span> {language === 'hi' ? 'शिक्षक मार्गदर्शक' : language === 'mr' ? 'मार्गदर्शक' : 'Instructor Guide'}
             </div>
             <div style={{ fontSize: '15px', lineHeight: '1.4', textAlign: 'left', fontWeight: '600' }}>{text}</div>
             
@@ -187,6 +212,8 @@ const UpiSimulator = ({ language: languageProp }) => {
     const runSpeak = () => {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(textToSpeak);
+      const unifiedVoice = getUnifiedVoice();
+      if (unifiedVoice) utterance.voice = unifiedVoice;
       const langMap = { en: 'en-IN', hi: 'hi-IN', mr: 'mr-IN' };
       utterance.lang = langMap[language] || 'en-IN';
       window.speechSynthesis.speak(utterance);
@@ -299,7 +326,7 @@ const UpiSimulator = ({ language: languageProp }) => {
         </div>
 
         {/* Outward Walkthrough Tooltip */}
-        <OutsideTooltip stepId={currentStepId} text={instructionText} />
+        <OutsideTooltip stepId={currentStepId} text={instructionText} language={language} />
 
         {/* Centered Smartphone Mockup */}
         <div id="smartphone-frame" style={{ width: '100%', maxWidth: '380px', height: '90vh', maxHeight: '760px', background: 'white', borderRadius: '48px', padding: '12px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5), inset 0 0 0 8px #1a1a1a', position: 'relative', overflow: 'hidden', marginTop: '40px' }}>
@@ -572,10 +599,10 @@ const UpiSimulator = ({ language: languageProp }) => {
             <div style={{ position: 'fixed', top: '50%', right: '40px', transform: 'translateY(-50%)', width: '420px', zIndex: 50 }}>
                 <div style={{ background: 'white', padding: '32px', borderRadius: '24px', borderLeft: '12px solid #5f259f', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0,0,0,0.05)' }}>
                     <h2 style={{ fontSize: '24px', fontWeight: '900', color: '#5f259f', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '28px' }}>💡</span> Did You Know?
+                        <span style={{ fontSize: '28px' }}>💡</span> {language === 'hi' ? 'क्या आप जानते हैं?' : language === 'mr' ? 'तुम्हाला माहित आहे का?' : 'Did You Know?'}
                     </h2>
                     <div key={currentStepId} style={{ animation: 'fadeContent 0.5s', fontSize: '18px', color: '#334155', lineHeight: '1.6', fontWeight: '600' }}>
-                        {KNOWLEDGE_BASE[currentStepId] || "Follow the guided instructions."}
+                        {(KNOWLEDGE_BASE[language] && KNOWLEDGE_BASE[language][currentStepId]) || KNOWLEDGE_BASE['en'][currentStepId] || "Follow the guided instructions."}
                     </div>
                 </div>
             </div>
