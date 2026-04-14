@@ -10,14 +10,27 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 
+// Request logger
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 // Environment Variables with Fallbacks for easier sharing
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/vivek_rakhsha';
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'fallback_secret_for_dev_only_12345';
 
 // MongoDB Connection
 mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected to Vivek Rakhsha DB'))
-  .catch(err => console.error('❌ MongoDB Connection Error:', err));
+  .then(() => {
+    console.log('✅ MongoDB Connected successfully');
+    console.log(`🔗 Connected to: ${MONGODB_URI.replace(/\/\/.*@/, '//****@')}`); // Hide credentials if any
+  })
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error!');
+    console.error('   Make sure MongoDB is running (Try: brew services start mongodb-community or equivalent)');
+    console.error('   Error details:', err.message);
+  });
 
 // Routes
 const authRoutes = require('./routes/auth');

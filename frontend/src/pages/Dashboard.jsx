@@ -22,13 +22,26 @@ const Dashboard = () => {
   const [showDisclaimer, setShowDisclaimer] = useState(() => !sessionStorage.getItem('disclaimerAccepted'));
   const [animatingTo, setAnimatingTo] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isOnline, setIsOnline] = useState(true);
 
   useEffect(() => {
+    // Check backend health
+    fetch('http://localhost:5000/api/auth/status')
+      .then(res => res.json())
+      .then(data => setIsOnline(data.status === 'online'))
+      .catch(() => setIsOnline(false));
+
     const timer = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % userImages.length);
     }, 2500);
     return () => clearInterval(timer);
   }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+    navigate('/login');
+  };
 
   const handleBankEntry = () => {
       setAnimatingTo('bank');
@@ -88,8 +101,28 @@ const Dashboard = () => {
         </div>
         
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+          {!isOnline && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.8rem', color: '#ff4444', background: 'rgba(255, 68, 68, 0.1)', padding: '4px 8px', borderRadius: '4px' }}>
+              <AlertCircle size={14} /> Offline Mode
+            </div>
+          )}
           <LanguageSelector />
           <ThemeToggle />
+          <button 
+            onClick={handleLogout}
+            style={{ 
+              background: 'none', 
+              border: 'none', 
+              color: 'var(--text-primary)', 
+              opacity: 0.7, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <LogOut size={18} />
+          </button>
         </div>
       </header>
 

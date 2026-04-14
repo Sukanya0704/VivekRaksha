@@ -322,7 +322,7 @@ const FraudSimulatorNew = () => {
 
                 {/* Show how to stay safe / identify truth (Only if Correct) */}
                 {isCorrect && scenario.explanationRight && (
-                  <div style={{ background: 'rgba(16, 185, 129, 0.05)', padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981', background: theme === 'light' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.1)' }}>
+                  <div style={{ padding: '1rem', borderRadius: '0.5rem', borderLeft: '4px solid #10B981', background: theme === 'light' ? 'rgba(16, 185, 129, 0.05)' : 'rgba(16, 185, 129, 0.1)' }}>
                     <p style={{ color: '#10B981', fontSize: '0.85rem', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '1px', fontWeight: 'bold' }}>
                       {ui.whyCorrect}
                     </p>

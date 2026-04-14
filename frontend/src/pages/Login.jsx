@@ -13,6 +13,15 @@ const Login = () => {
   const isCompact = language === 'hi' || language === 'mr';
   const [isSignup, setIsSignup] = useState(location.state?.isSignup || false);
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState({ type: '', message: '' });
+
+  // Clear status after 3 seconds
+  React.useEffect(() => {
+    if (status.message) {
+      const timer = setTimeout(() => setStatus({ type: '', message: '' }), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
 
   React.useEffect(() => {
     if (location.state?.isSignup !== undefined) {
@@ -35,47 +44,42 @@ const Login = () => {
     setLoading(true);
 
     try {
+      const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login';
+      const body = isSignup 
+        ? { name: formData.name, phone: formData.phone, pin: formData.pin }
+        : { phone: formData.phone, pin: formData.pin };
+
+      if (isSignup && formData.pin !== formData.confirmPin) {
+        setStatus({ type: 'error', message: t('pinMismatch') });
+        setLoading(false);
+        return;
+      }
+
+      const res = await fetch(`http://localhost:5000${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      }).catch(err => {
+        throw new Error('Backend server is not responding. Please ensure the backend is running.');
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Something went wrong');
+
+      // Sync to LocalStorage for persistence
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('token', data.token);
+
       if (isSignup) {
-        if (formData.pin !== formData.confirmPin) {
-          alert(t('pinMismatch'));
-          setLoading(false);
-          return;
-        }
-
-        const res = await fetch('http://localhost:5000/api/auth/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: formData.name,
-            phone: formData.phone,
-            pin: formData.pin
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-
-        alert(t('signupSuccess'));
-        setIsSignup(false);
+        setStatus({ type: 'success', message: `${t('signupSuccess')} - ${data.message || 'Data stored'}` });
+        // After small delay, move to dashboard
+        setTimeout(() => navigate('/dashboard'), 1500);
       } else {
-        const res = await fetch('http://localhost:5000/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            phone: formData.phone,
-            pin: formData.pin
-          })
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message);
-
-        localStorage.setItem('user', JSON.stringify(data.user));
-        localStorage.setItem('token', data.token);
         navigate('/dashboard');
       }
     } catch (err) {
-      alert(err.message || t('errorOccurred'));
+      console.error('Auth Error:', err);
+      setStatus({ type: 'error', message: err.message });
     } finally {
       setLoading(false);
     }
@@ -92,6 +96,21 @@ const Login = () => {
           <img src={logo} alt="Logo" style={{ height: '48px', marginBottom: '1rem' }} />
           <h2 className="title-lg" style={{ color: 'var(--text-primary)' }}>{isSignup ? t('signup') : t('login')}</h2>
         </div>
+
+        {status.message && (
+          <div className={`animate-fade-in`} style={{ 
+            padding: '12px', 
+            borderRadius: '8px', 
+            marginBottom: '1rem', 
+            fontSize: '0.9rem',
+            textAlign: 'center',
+            background: status.type === 'error' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(34, 197, 94, 0.1)',
+            border: `1px solid ${status.type === 'error' ? '#ef4444' : '#22c55e'}`,
+            color: status.type === 'error' ? '#ef4444' : '#22c55e'
+          }}>
+            {status.message}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: isCompact ? '0.8rem' : '1.2rem' }}>
           {isSignup && (
