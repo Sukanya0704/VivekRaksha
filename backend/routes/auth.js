@@ -86,4 +86,5 @@ router.get('/status', (req, res) => {
   });
 });
 
+router.protect = protect;
 module.exports = router;

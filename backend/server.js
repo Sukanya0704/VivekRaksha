@@ -34,7 +34,12 @@ mongoose.connect(MONGODB_URI)
 
 // Routes
 const authRoutes = require('./routes/auth');
+const progressRoutes = require('./routes/progress');
+const aiAnalyzerRoutes = require('./routes/aiAnalyzer');
+
 app.use('/api/auth', authRoutes);
+app.use('/api/progress', progressRoutes);
+app.use('/api/analyze', aiAnalyzerRoutes);
 
 app.get('/', (req, res) => {
   res.send('Vivek Rakhsha Backend is running...');

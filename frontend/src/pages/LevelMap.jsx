@@ -271,6 +271,23 @@ const LevelMap = () => {
     if (location?.state?.justCompleted) {
       window.history.replaceState({}, "");
     }
+
+    const fetchProgress = async () => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const res = await fetch('http://localhost:5000/api/progress', {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            setProgress({ completed: data.completedModules, highestUnlocked: data.highestUnlocked });
+            localStorage.setItem("vivekRaksha_mapState", JSON.stringify({ highestUnlocked: data.highestUnlocked, completed: data.completedModules }));
+          }
+        } catch (e) {}
+      }
+    };
+    fetchProgress();
   }, [location?.state?.justCompleted]);
 
   const [showGuide, setShowGuide] = useState(false);

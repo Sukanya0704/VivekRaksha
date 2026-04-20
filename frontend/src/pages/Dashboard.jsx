@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
-import { Landmark, Building2, AlertCircle, Info, LogOut, Navigation } from 'lucide-react';
+import { Landmark, Building2, AlertCircle, Info, LogOut, Navigation, ShieldCheck, Loader2 } from 'lucide-react';
 import ThemeToggle from '../components/ThemeToggle';
 import LanguageSelector from '../components/LanguageSelector';
 import bankBg from '../assets/bank_bg.png';
@@ -23,6 +23,29 @@ const Dashboard = () => {
   const [animatingTo, setAnimatingTo] = useState(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isOnline, setIsOnline] = useState(true);
+
+  const [scamText, setScamText] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
+  const [analysisResult, setAnalysisResult] = useState(null);
+  
+  const handleAnalyzeScam = async () => {
+    if (!scamText.trim()) return;
+    setAnalyzing(true);
+    setAnalysisResult(null);
+    try {
+      const res = await fetch('http://localhost:5000/api/analyze/scam', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: scamText })
+      });
+      const data = await res.json();
+      setAnalysisResult(data);
+    } catch (e) {
+      setAnalysisResult({ status: 'ERROR', reasoning: 'Could not connect to analyzer.' });
+    } finally {
+      setAnalyzing(false);
+    }
+  };
 
   useEffect(() => {
     // Check backend health
@@ -202,6 +225,54 @@ const Dashboard = () => {
                     {t('enterFacility')}
                 </button>
             </div>
+        </div>
+
+        {/* Scam Analyzer Section */}
+        <div className="glass-panel animate-fade-in-delay-2" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', marginTop: '1rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1rem', borderRadius: '50%' }}>
+               <ShieldCheck size={32} color="#3B82F6" />
+            </div>
+            <div>
+               <h3 style={{ fontSize: '1.5rem', fontFamily: 'var(--font-heading)', color: 'var(--text-primary)', margin: '0 0 0.5rem 0' }}>Live Scam Analyzer (AI)</h3>
+               <p style={{ margin: 0, color: 'var(--text-primary)', opacity: 0.8 }}>Paste a suspicious SMS, email, or link below to get an instant AI analysis.</p>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <textarea 
+              value={scamText}
+              onChange={(e) => setScamText(e.target.value)}
+              placeholder="e.g. 'Dear customer, your account is blocked. Click here to KYC: http://bit.ly/update-kyc'"
+              style={{ flex: 1, minWidth: '300px', minHeight: '80px', padding: '1rem', borderRadius: '12px', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', fontFamily: 'var(--font-body)', resize: 'vertical', outline: 'none' }}
+            />
+            <button 
+              onClick={handleAnalyzeScam}
+              disabled={analyzing || !scamText.trim()}
+              className="btn btn-primary"
+              style={{ padding: '0 2rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', minWidth: '160px', opacity: (analyzing || !scamText.trim()) ? 0.6 : 1 }}
+            >
+              {analyzing ? <Loader2 className="animate-spin" /> : 'Analyze'}
+            </button>
+          </div>
+
+          {analysisResult && (
+            <div className="animate-fade-in" style={{ 
+              padding: '1.5rem', 
+              borderRadius: '12px', 
+              background: analysisResult.status === 'SCAM' ? 'rgba(239, 68, 68, 0.1)' : analysisResult.status === 'SAFE' ? 'rgba(34, 197, 94, 0.1)' : 'rgba(255, 159, 28, 0.1)',
+              border: `1px solid ${analysisResult.status === 'SCAM' ? '#EF4444' : analysisResult.status === 'SAFE' ? '#22C55E' : '#FF9F1C'}`,
+              display: 'flex', gap: '1rem', alignItems: 'flex-start'
+            }}>
+               {analysisResult.status === 'SCAM' ? <AlertCircle color="#EF4444" size={24} style={{flexShrink: 0}} /> : analysisResult.status === 'SAFE' ? <ShieldCheck color="#22C55E" size={24} style={{flexShrink: 0}} /> : <Info color="#FF9F1C" size={24} style={{flexShrink: 0}} />}
+               <div>
+                 <h4 style={{ margin: '0 0 0.5rem 0', fontFamily: 'var(--font-heading)', color: analysisResult.status === 'SCAM' ? '#EF4444' : analysisResult.status === 'SAFE' ? '#22C55E' : '#FF9F1C' }}>
+                   Verdict: {analysisResult.status} {analysisResult.confidence ? `(${analysisResult.confidence}% Confidence)` : ''}
+                 </h4>
+                 <p style={{ margin: 0, color: 'var(--text-primary)', opacity: 0.9, lineHeight: 1.5 }}>{analysisResult.reasoning}</p>
+               </div>
+            </div>
+          )}
         </div>
 
       </main>

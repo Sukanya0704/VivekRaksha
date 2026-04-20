@@ -5,6 +5,9 @@ const userSchema = new mongoose.Schema({
   name: { type: String, required: true },
   phone: { type: String, required: true, unique: true },
   pin: { type: String, required: true },
+  completedModules: { type: [Number], default: [] },
+  highestUnlocked: { type: Number, default: 1 },
+  score: { type: Number, default: 0 },
   createdAt: { type: Date, default: Date.now }
 });
 

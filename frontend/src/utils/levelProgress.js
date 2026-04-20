@@ -24,7 +24,18 @@ export function getProgress() {
  * @param {number} levelId  – 1-based level number
  * @param {Function} navigate – react-router navigate function
  */
-export function markLevelComplete(levelId, navigate) {
+export async function markLevelComplete(levelId, navigate) {
+  const token = localStorage.getItem('token');
+  if (token) {
+    try {
+      await fetch('http://localhost:5000/api/progress/complete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ moduleId: levelId, scoreEarned: 100 })
+      });
+    } catch (e) {}
+  }
+
   const prev = getProgress();
   const completed = [...new Set([...prev.completed, levelId])];
   const highestUnlocked = Math.min(6, Math.max(prev.highestUnlocked, levelId + 1));
